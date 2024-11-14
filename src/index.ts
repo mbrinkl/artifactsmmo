@@ -17,4 +17,4 @@ export const client = createClient<paths>({
   redirect: "follow",
 });
 
-await gatherCopperScenario();
+gatherCopperScenario();
