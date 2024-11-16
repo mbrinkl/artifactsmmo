@@ -1,10 +1,10 @@
 import { deposit, gather, move } from "../actions";
-import { coords, MapLocation } from "../config";
+import { coords, GatherLocation } from "../config";
 import { PipelineConfig, PipelineContext, PipelineItem, runPipeline } from "../pipeline";
 import { ActionResultData } from "../types";
 
 interface Context extends PipelineContext {
-  oreLocation: MapLocation;
+  location: GatherLocation;
 }
 
 const onExecuted = (res: ActionResultData | null, context: Context): PipelineItem[] => {
@@ -24,7 +24,7 @@ const onExecuted = (res: ActionResultData | null, context: Context): PipelineIte
     return [
       { action: move, payload: coords["Bank"] },
       ...depositAllPipeline,
-      { action: move, payload: coords[context.oreLocation], onExecuted },
+      { action: move, payload: coords[context.location], onExecuted },
     ];
   }
 
@@ -34,10 +34,10 @@ const onExecuted = (res: ActionResultData | null, context: Context): PipelineIte
   }
 };
 
-export const mineAndBankScenario = async (context: Context) => {
+export const gatherAndBankScenario = async (context: Context) => {
   const config: PipelineConfig<Context> = {
     pipeline: [
-      { action: move, payload: coords[context.oreLocation] },
+      { action: move, payload: coords[context.location] },
       { action: gather, onExecuted },
     ],
     context,
