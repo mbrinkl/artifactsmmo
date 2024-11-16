@@ -1,33 +1,32 @@
 import { client } from ".";
-import { CHARACTER_NAME } from "./config";
-import { Destination, Drop } from "./types";
+import { ActionResultData, Destination, Drop } from "./types";
 
-export const move = async (destintation: Destination) => {
+export const move = async (name: string, destintation: Destination) => {
   const { data, error } = await client.POST("/my/{name}/action/move", {
-    params: { path: { name: CHARACTER_NAME } },
+    params: { path: { name } },
     body: destintation,
   });
 
   return handle(data?.data, error, [490]); // ignore if already at destination
 };
 
-export const fight = async () => {
+export const fight = async (name: string) => {
   const { data, error } = await client.POST("/my/{name}/action/fight", {
-    params: { path: { name: CHARACTER_NAME } },
+    params: { path: { name } },
   });
   return handle(data?.data, error);
 };
 
-export const gather = async () => {
+export const gather = async (name: string) => {
   const { data, error } = await client.POST("/my/{name}/action/gathering", {
-    params: { path: { name: CHARACTER_NAME } },
+    params: { path: { name } },
   });
   return handle(data?.data, error);
 };
 
-export const deposit = async (item: Drop) => {
+export const deposit = async (name: string, item: Drop) => {
   const { data, error } = await client.POST("/my/{name}/action/bank/deposit", {
-    params: { path: { name: CHARACTER_NAME } },
+    params: { path: { name } },
     body: item,
   });
   return handle(data?.data, error);
@@ -40,7 +39,11 @@ interface Err {
   };
 }
 
-const handle = <T>(data: T | undefined, error: Err | undefined, ignoreCodes?: number[]): T | null => {
+const handle = <T extends ActionResultData>(
+  data: T | undefined,
+  error: Err | undefined,
+  ignoreCodes?: number[]
+): T | null => {
   if (error) {
     console.error("error", error.error);
     if (ignoreCodes && ignoreCodes.includes(error.error.code)) {

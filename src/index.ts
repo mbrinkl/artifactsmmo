@@ -1,6 +1,6 @@
 import createClient from "openapi-fetch";
 import { paths } from "./schema";
-import { gatherCopperScenario } from "./scenarios/gatherCopperScenario";
+import { mineAndBankScenario } from "./scenarios/mineAndBankScenario";
 
 const authToken = process.env.auth_token;
 if (!authToken) {
@@ -17,4 +17,6 @@ export const client = createClient<paths>({
   redirect: "follow",
 });
 
-gatherCopperScenario();
+mineAndBankScenario({ characterName: "Toby", oreLocation: "Iron_Rocks" });
+mineAndBankScenario({ characterName: "Carlos", oreLocation: "Copper_Rocks" });
+mineAndBankScenario({ characterName: "Rascal", oreLocation: "Copper_Rocks" });
