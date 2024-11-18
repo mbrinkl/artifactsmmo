@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CharacterInfo } from "../../../server/src/types";
+import { CharacterInfo } from "@artifacts/shared";
 
 const getDashboardData = async (token: string) => {
   const response = await fetch("http://localhost:3000/dashboard-data", {

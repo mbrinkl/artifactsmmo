@@ -1,7 +1,8 @@
 import { FastifyInstance } from "fastify";
 import { scenarioFactory } from "../scenarios";
-import { CharacterInfo } from "../types";
-import { characterInfo } from "..";
+import { characterContext } from "..";
+import { CharacterInfo } from "@artifacts/shared";
+import { CharacterContext } from "../types";
 
 export const hooks = (fastify: FastifyInstance) => {
   fastify.addHook("onRequest", (req, res, done) => {
@@ -26,13 +27,15 @@ export const hooks = (fastify: FastifyInstance) => {
 
 export const routes = (fastify: FastifyInstance) => {
   fastify.get("/dashboard-data", (req, res) => {
-    res.send(Object.values(characterInfo));
+    // TODO: maybe strip queue
+    res.send(Object.values(characterContext));
   });
 
   fastify.post("/update-activity", (req, res) => {
     const body = JSON.parse(req.body as string) as CharacterInfo;
-    scenarioFactory(body);
-    characterInfo[body.characterName] = body;
+    const ctx: CharacterContext = { ...body, queue: [] };
+    scenarioFactory(ctx);
+    characterContext[ctx.characterName] = ctx;
     res.send(body);
   });
 

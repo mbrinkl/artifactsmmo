@@ -21,9 +21,9 @@ const App = () => {
   }
 
   return (
-    <div>
-      <Dashboard token={token} />
+    <div style={{ height: "100dvh", display: "flex", flexDirection: "column" }}>
       <button onClick={clearToken}>Clear Token</button>
+      <Dashboard token={token} />
     </div>
   );
 };

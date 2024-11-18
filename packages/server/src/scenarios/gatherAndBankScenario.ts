@@ -1,7 +1,7 @@
 import { deposit, gather, move } from "../api";
-import { coords, GatherLocation } from "../config";
+import { coords, GatherLocation, ActionResultData } from "@artifacts/shared";
 import { PipelineItem, runPipeline } from "../pipeline";
-import { ActionResultData, CharacterInfo } from "../types";
+import { CharacterContext } from "../types";
 
 export interface GatherContext {
   location: GatherLocation;
@@ -34,12 +34,12 @@ const onExecuted = (res: ActionResultData | null, context: GatherContext): Pipel
   }
 };
 
-export const gatherAndBankScenario = async (characterInfo: CharacterInfo) => {
-  console.log("in da scenario?", characterInfo);
-  characterInfo.queue = [
-    { action: move, payload: coords[characterInfo.activity!.context.location] },
+export const gatherAndBankScenario = async (ctx: CharacterContext) => {
+  ctx.queue = [
+    // TODO need to pass gather context in as generic to character context or something
+    { action: move, payload: coords[(ctx.activity!.context as GatherContext).location] },
     { action: gather, onExecuted },
   ];
 
-  await runPipeline(characterInfo);
+  await runPipeline(ctx);
 };

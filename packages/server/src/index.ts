@@ -4,7 +4,7 @@ import createClient from "openapi-fetch";
 import { paths } from "@artifacts/shared";
 import { getCharacters } from "./api";
 import { hooks, routes } from "./routes";
-import { CharacterInfo } from "./types";
+import { CharacterContext } from "./types";
 
 const authToken = process.env.auth_token;
 if (!authToken) {
@@ -27,7 +27,7 @@ if (!characters) {
 }
 const characterNames = characters.map((x) => x.name);
 
-export const characterInfo: Record<string, CharacterInfo> = {};
+export const characterContext: Record<string, CharacterContext> = {};
 
 characterNames.forEach((characterName) => {
   // if name is in db
@@ -35,7 +35,7 @@ characterNames.forEach((characterName) => {
   // factory(activity)
   // return charactername with stored activity
   // else
-  characterInfo[characterName] = { characterName, activity: null, queue: [] };
+  characterContext[characterName] = { characterName, activity: null, queue: [] };
 });
 
 // gatherAndBankScenario({ characterName: "Toby", location: "Iron_Rocks" });

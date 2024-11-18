@@ -1,6 +1,7 @@
-import { CharacterInfo } from "../../../server/src/types";
+import { Stack } from "@mantine/core";
+import { CharacterInfo } from "@artifacts/shared";
 import { useGetDashboardDataQuery, useUpdateActivityMutation } from "../api";
-import "./Dashboard.css";
+import { DashboardCharacter } from "./DashboardCharacter";
 
 interface DashboardProps {
   token: string;
@@ -27,23 +28,10 @@ export const Dashboard = (props: DashboardProps) => {
   }
 
   return (
-    <div>
+    <Stack>
       {data.map((x) => (
-        <div>
-          {x.characterName}: {x.activity ? x.activity.name + JSON.stringify(x.activity.context) : "None"}
-          <button
-            onClick={() =>
-              update({
-                characterName: x.characterName,
-                activity: { name: "gather", context: { location: "Copper_Rocks" } },
-                queue: [],
-              })
-            }
-          >
-            gg idiot
-          </button>
-        </div>
+        <DashboardCharacter x={x} update={update} />
       ))}
-    </div>
+    </Stack>
   );
 };

@@ -1,5 +1,5 @@
 import { client } from "..";
-import { ActionResultData, Destination, Drop } from "../types";
+import { ActionResultData, Destination, Drop } from "@artifacts/shared";
 
 export const move = async (name: string, destintation: Destination) => {
   const { data, error } = await client.POST("/my/{name}/action/move", {

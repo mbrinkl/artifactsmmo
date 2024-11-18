@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2020", // Set the JavaScript version to target
     "module": "ESNext", // Use ESNext modules, adjust if necessary
-    "moduleResolution": "node", // Use Node's module resolution
+    "moduleResolution": "bundler", // Use Node's module resolution
     "esModuleInterop": true, // Allows default imports for CommonJS modules
     "forceConsistentCasingInFileNames": true, // Enforce consistent casing
     "strict": true, // Enable strict type checking
