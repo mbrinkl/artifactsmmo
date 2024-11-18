@@ -42,7 +42,7 @@ interface Err {
 const handle = <T extends ActionResultData>(
   data: T | undefined,
   error: Err | undefined,
-  ignoreCodes?: number[]
+  ignoreCodes?: number[],
 ): T | null => {
   if (error) {
     console.error("error", error.error);
