@@ -1,10 +1,13 @@
 import Fastify from "fastify";
-import cors from "@fastify/cors";
+import fastifyCors from "@fastify/cors";
+import fastifyStatic from "@fastify/static";
 import createClient from "openapi-fetch";
 import { paths } from "@artifacts/shared";
 import { getCharacters } from "./api";
 import { hooks, routes } from "./routes";
 import { CharacterContext } from "./types";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
 
 const authToken = process.env.auth_token;
 if (!authToken) {
@@ -46,7 +49,19 @@ characterNames.forEach((characterName) => {
 
 const fastify = Fastify();
 
-await fastify.register(cors);
+console.log("env is", process.env.NODE_ENV);
+
+if (process.env.NODE_ENV === "development") {
+  await fastify.register(fastifyCors);
+} else {
+  await fastify.register(fastifyStatic, {
+    root: path.join(dirname(fileURLToPath(import.meta.url)), "../../client/dist"),
+  });
+  fastify.get("/", (req, res) => {
+    res.sendFile("index.html");
+  });
+}
+
 await fastify.register(hooks);
 await fastify.register(routes);
 

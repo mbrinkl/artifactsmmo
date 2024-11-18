@@ -8,7 +8,9 @@
     "openapi-gen": "openapi-typescript https://api.artifactsmmo.com/openapi.json -o ./packages/shared/schema.ts",
     "server": "npm run dev --workspace=packages/server",
     "client": "npm run dev --workspace=packages/client",
-    "start": "concurrently -c cyan,magenta npm:server npm:client",
+    "dev": "concurrently -c cyan,magenta npm:server npm:client",
+    "prod": "npm run prod --workspace=packages/server",
+    "build": "npm run build --workspaces",
     "prettier": "prettier . --write",
     "lint": "eslint ."
   },
@@ -20,6 +22,7 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
     "globals": "^15.12.0",
+    "openapi-typescript": "^7.4.3",
     "prettier": "^3.3.3",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.14.0"
