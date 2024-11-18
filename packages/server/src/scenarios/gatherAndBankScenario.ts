@@ -1,9 +1,9 @@
 import { deposit, gather, move } from "../api";
 import { coords, GatherLocation } from "../config";
-import { PipelineConfig, PipelineContext, PipelineItem, runPipeline } from "../pipeline";
-import { ActionResultData } from "../types";
+import { PipelineItem, runPipeline } from "../pipeline";
+import { ActionResultData, CharacterInfo } from "../types";
 
-export interface GatherContext extends PipelineContext {
+export interface GatherContext {
   location: GatherLocation;
 }
 
@@ -34,14 +34,12 @@ const onExecuted = (res: ActionResultData | null, context: GatherContext): Pipel
   }
 };
 
-export const gatherAndBankScenario = async (context: GatherContext) => {
-  const config: PipelineConfig<GatherContext> = {
-    pipeline: [
-      { action: move, payload: coords[context.location] },
-      { action: gather, onExecuted },
-    ],
-    context,
-  };
+export const gatherAndBankScenario = async (characterInfo: CharacterInfo) => {
+  console.log("in da scenario?", characterInfo);
+  characterInfo.queue = [
+    { action: move, payload: coords[characterInfo.activity!.context.location] },
+    { action: gather, onExecuted },
+  ];
 
-  await runPipeline(config);
+  await runPipeline(characterInfo);
 };

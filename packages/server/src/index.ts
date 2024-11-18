@@ -27,13 +27,15 @@ if (!characters) {
 }
 const characterNames = characters.map((x) => x.name);
 
-export const characterInfo: CharacterInfo[] = characterNames.map((characterName) => {
-  // if name does not exist in db?
-  if (characterName === "asdfadsf") {
-    // activity = stored activity
-    // factory(activity)
-  }
-  return { characterName, activity: null };
+export const characterInfo: Record<string, CharacterInfo> = {};
+
+characterNames.forEach((characterName) => {
+  // if name is in db
+  // activity = stored activity
+  // factory(activity)
+  // return charactername with stored activity
+  // else
+  characterInfo[characterName] = { characterName, activity: null, queue: [] };
 });
 
 // gatherAndBankScenario({ characterName: "Toby", location: "Iron_Rocks" });

@@ -36,6 +36,7 @@ export const Dashboard = (props: DashboardProps) => {
               update({
                 characterName: x.characterName,
                 activity: { name: "gather", context: { location: "Copper_Rocks" } },
+                queue: [],
               })
             }
           >

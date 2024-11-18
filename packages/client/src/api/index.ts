@@ -27,7 +27,7 @@ const updateActivity = async (token: string, characterInfo: CharacterInfo) => {
 
 // poll? refetchInterval
 export const useGetDashboardDataQuery = (token: string) =>
-  useQuery({ queryKey: ["test"], queryFn: () => getDashboardData(token) });
+  useQuery({ queryKey: ["dashboard-data"], queryFn: () => getDashboardData(token), refetchInterval: 5000 });
 
 export const useUpdateActivityMutation = () =>
   useMutation({

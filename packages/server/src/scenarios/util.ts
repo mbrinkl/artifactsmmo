@@ -1,17 +1,17 @@
 import { CharacterInfo } from "../types";
 import { gatherAndBankScenario } from "./gatherAndBankScenario";
 
-export const scenarioFactory = ({ characterName, activity }: CharacterInfo) => {
+export const scenarioFactory = (info: CharacterInfo) => {
   // some graceful shutdown of character ...
-  if (!activity) return;
-  const context = { characterName, ...activity.context };
+  if (!info.activity) return;
 
-  switch (activity?.name) {
+  switch (info.activity.name) {
     case "gather":
-      gatherAndBankScenario(context);
+      console.log("doing scenario?");
+      gatherAndBankScenario(info);
       break;
     default:
-      console.log("Invalid activity:", activity.name);
+      console.log("Invalid activity:", info.activity.name);
       break;
   }
 };

@@ -1,5 +1,6 @@
 import { components } from "@artifacts/shared";
 import { GatherContext } from "./scenarios";
+import { PipelineItem } from "./pipeline";
 
 export interface ActionResultData {
   character: Character;
@@ -16,5 +17,5 @@ export type Activity = { name: "gather"; context: Omit<GatherContext, "character
 export interface CharacterInfo {
   characterName: string;
   activity: Activity | null;
-  // currqueue ?
+  queue: PipelineItem[];
 }

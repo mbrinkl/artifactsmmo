@@ -25,13 +25,17 @@ export const hooks = (fastify: FastifyInstance) => {
 };
 
 export const routes = (fastify: FastifyInstance) => {
-  fastify.get<{ Reply: CharacterInfo[] }>("/dashboard-data", (req, res) => {
-    res.send(characterInfo);
+  fastify.get("/dashboard-data", (req, res) => {
+    res.send(Object.values(characterInfo));
   });
 
-  fastify.post<{ Body: CharacterInfo }>("/update-activity", (req, res) => {
-    // scenarioFactory(req.body);
-    console.log("got data...", req.body);
-    res.send();
+  fastify.post("/update-activity", (req, res) => {
+    const body = JSON.parse(req.body as string) as CharacterInfo;
+    scenarioFactory(body);
+    characterInfo[body.characterName] = body;
+    res.send(body);
   });
+
+  // stop-after-task ?
+  // stop-after-queue
 };
