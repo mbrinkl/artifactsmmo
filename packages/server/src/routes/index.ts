@@ -1,8 +1,9 @@
 import { FastifyInstance } from "fastify";
 import { scenarioFactory } from "../scenarios";
-import { characterContext } from "..";
+import { characterContext, db } from "..";
 import { CharacterInfo } from "@artifacts/shared";
 import { CharacterContext } from "../types";
+import { characterActivityTable } from "../db/schema";
 
 export const hooks = (fastify: FastifyInstance) => {
   fastify.addHook("onRequest", (req, res, done) => {
@@ -31,11 +32,19 @@ export const routes = (fastify: FastifyInstance) => {
     res.send(Object.values(characterContext));
   });
 
-  fastify.post("/update-activity", (req, res) => {
+  fastify.post("/update-activity", async (req, res) => {
     const body = JSON.parse(req.body as string) as CharacterInfo;
     const ctx: CharacterContext = { ...body, queue: [] };
     scenarioFactory(ctx);
     characterContext[ctx.characterName] = ctx;
+
+    const storeData: typeof characterActivityTable.$inferInsert = {
+      name: ctx.characterName,
+      activityName: ctx.activity?.name || null,
+      activityContext: ctx.activity?.context ? JSON.stringify(ctx.activity.context) : null,
+    };
+    await db.insert(characterActivityTable).values(storeData);
+
     res.send(body);
   });
 

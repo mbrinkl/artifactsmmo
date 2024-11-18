@@ -2,12 +2,17 @@ import Fastify from "fastify";
 import fastifyCors from "@fastify/cors";
 import fastifyStatic from "@fastify/static";
 import createClient from "openapi-fetch";
-import { paths } from "@artifacts/shared";
+import { Activity, ActivityName, paths } from "@artifacts/shared";
 import { getCharacters } from "./api";
 import { hooks, routes } from "./routes";
 import { CharacterContext } from "./types";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
+import { drizzle } from "drizzle-orm/libsql";
+import { characterActivityTable } from "./db/schema";
+import { scenarioFactory } from "./scenarios";
+
+export const db = drizzle("file:local.db");
 
 const authToken = process.env.auth_token;
 if (!authToken) {
@@ -32,18 +37,19 @@ const characterNames = characters.map((x) => x.name);
 
 export const characterContext: Record<string, CharacterContext> = {};
 
+const storedCharacterActivities = await db.select().from(characterActivityTable);
+
 characterNames.forEach((characterName) => {
-  // if name is in db
-  // activity = stored activity
-  // factory(activity)
-  // return charactername with stored activity
-  // else
-  // gatherAndBankScenario({ characterName: "Toby", location: "Iron_Rocks" });
-  // gatherAndBankScenario({ characterName: "Carlos", location: "Copper_Rocks" });
-  // gatherAndBankScenario({ characterName: "Rascal", location: "Gudgeon_Fishing" });
-  // gatherAndBankScenario({ characterName: "Piper", location: "Sunflower" });
-  // gatherAndBankScenario({ characterName: "Sadie", location: "Ash_Tree" });
-  characterContext[characterName] = { characterName, activity: null, queue: [] };
+  const stored = storedCharacterActivities.find((x) => x.name === characterName);
+  if (stored) {
+    console.log(characterName, "Restored Activity - ", stored.activityName, stored.activityContext);
+    const storedContext = stored.activityContext ? JSON.parse(stored.activityContext) : null;
+    const storedActivity: Activity = { name: stored.activityName as ActivityName, context: storedContext };
+    characterContext[characterName] = { characterName, activity: storedActivity, queue: [] };
+    scenarioFactory(characterContext[characterName]);
+  } else {
+    characterContext[characterName] = { characterName, activity: null, queue: [] };
+  }
 });
 
 const fastify = Fastify();
