@@ -6,7 +6,7 @@
     "prod": "cross-env NODE_ENV=production tsx --env-file=../../.env src/index.ts",
     "build": "tsc -p ./tsconfig.build.json",
     "lint": "eslint .",
-    "type-check": "tsc --no-emit"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@artifacts/shared": "file:../shared",

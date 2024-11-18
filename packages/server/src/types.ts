@@ -1,6 +1,6 @@
 import { CharacterInfo } from "@artifacts/shared";
-import { PipelineItem } from "./pipeline";
+import { QueueItem } from "./queue";
 
 export interface CharacterContext extends CharacterInfo {
-  queue: PipelineItem[];
+  queue: QueueItem[];
 }

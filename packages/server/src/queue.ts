@@ -1,17 +1,17 @@
 import { ActionResultData } from "@artifacts/shared";
 import { CharacterContext } from "./types";
 
-export interface PipelineItem<TContext = any, T = any> {
+export interface QueueItem<TContext = any, T = any> {
   action: (name: string, payload?: T) => Promise<ActionResultData | null>;
   payload?: T;
-  onExecuted?: (result: ActionResultData | null, context: TContext) => PipelineItem<unknown>[];
+  onExecuted?: (result: ActionResultData | null, context: TContext) => QueueItem<unknown>[];
 }
 
 const delay = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-export const runPipeline = async (ctx: CharacterContext) => {
+export const runQueue = async (ctx: CharacterContext) => {
   const log = (...message: (string | number)[]) => {
     console.log(`${ctx.characterName.padEnd(7)}: ${message.map((x) => JSON.stringify(x)).join(" ")}`);
   };
@@ -38,5 +38,5 @@ export const runPipeline = async (ctx: CharacterContext) => {
   if (result?.cooldown?.remaining_seconds) {
     await delay(result?.cooldown.remaining_seconds * 1000);
   }
-  await runPipeline(ctx);
+  await runQueue(ctx);
 };

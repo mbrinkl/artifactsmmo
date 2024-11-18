@@ -38,18 +38,15 @@ characterNames.forEach((characterName) => {
   // factory(activity)
   // return charactername with stored activity
   // else
+  // gatherAndBankScenario({ characterName: "Toby", location: "Iron_Rocks" });
+  // gatherAndBankScenario({ characterName: "Carlos", location: "Copper_Rocks" });
+  // gatherAndBankScenario({ characterName: "Rascal", location: "Gudgeon_Fishing" });
+  // gatherAndBankScenario({ characterName: "Piper", location: "Sunflower" });
+  // gatherAndBankScenario({ characterName: "Sadie", location: "Ash_Tree" });
   characterContext[characterName] = { characterName, activity: null, queue: [] };
 });
 
-// gatherAndBankScenario({ characterName: "Toby", location: "Iron_Rocks" });
-// gatherAndBankScenario({ characterName: "Carlos", location: "Copper_Rocks" });
-// gatherAndBankScenario({ characterName: "Rascal", location: "Gudgeon_Fishing" });
-// gatherAndBankScenario({ characterName: "Piper", location: "Sunflower" });
-// gatherAndBankScenario({ characterName: "Sadie", location: "Ash_Tree" });
-
 const fastify = Fastify();
-
-console.log("env is", process.env.NODE_ENV);
 
 if (process.env.NODE_ENV === "development") {
   await fastify.register(fastifyCors);
