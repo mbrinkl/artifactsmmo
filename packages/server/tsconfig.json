@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.build.json",
+  "compilerOptions": {
+    "paths": {
+      "@artifacts/shared": ["../shared/src"]
+    }
+  },
+  "include": ["src", "../shared/src"]
+}
