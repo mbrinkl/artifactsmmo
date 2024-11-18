@@ -7,7 +7,7 @@ export interface QueueItem<TContext = any, T = any> {
   onExecuted?: (result: ActionResultData | null, context: TContext) => QueueItem<unknown>[];
 }
 
-const delay = (ms: number): Promise<void> => {
+export const delay = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
@@ -33,10 +33,10 @@ export const runQueue = async (ctx: CharacterContext) => {
     log(`Updated pipeline: [ ${ctx.queue.map((x) => x.action.name).join()} ]`);
   }
 
-  log("cooldown:", result?.cooldown.remaining_seconds || "none");
+  log("cooldown:", result?.character.cooldown || "none");
 
-  if (result?.cooldown?.remaining_seconds) {
-    await delay(result?.cooldown.remaining_seconds * 1000);
+  if (result?.character.cooldown) {
+    await delay(result.character.cooldown * 1000);
   }
   await runQueue(ctx);
 };

@@ -7,5 +7,4 @@ export type Drop = components["schemas"]["DropSchema"];
 
 export interface ActionResultData {
   character: Character;
-  cooldown: Cooldown;
 }

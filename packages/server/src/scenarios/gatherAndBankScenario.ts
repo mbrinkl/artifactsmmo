@@ -1,6 +1,6 @@
-import { deposit, gather, move } from "../api";
+import { deposit, gather, getCharacter, move } from "../api";
 import { coords, GatherLocation, ActionResultData } from "@artifacts/shared";
-import { QueueItem, runQueue } from "../queue";
+import { delay, QueueItem, runQueue } from "../queue";
 import { CharacterContext } from "../types";
 
 export interface GatherContext {
@@ -35,11 +35,11 @@ const onExecuted = (res: ActionResultData | null, context: GatherContext): Queue
 };
 
 export const gatherAndBankScenario = async (ctx: CharacterContext) => {
-  ctx.queue = [
-    // TODO need to pass gather context in as generic to character context or something
-    { action: move, payload: coords[(ctx.activity!.context as GatherContext).location] },
-    { action: gather, onExecuted },
-  ];
-
+  const initialCharacterState = await getCharacter(ctx.characterName);
+  if (initialCharacterState.cooldown) {
+    console.log(ctx.characterName, "Awaiting existing cooldown:", initialCharacterState.cooldown);
+    await delay(initialCharacterState.cooldown * 1000);
+  }
+  ctx.queue = onExecuted({ character: initialCharacterState }, ctx.activity?.context as GatherContext);
   await runQueue(ctx);
 };
