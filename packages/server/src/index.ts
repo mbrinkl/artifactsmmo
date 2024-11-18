@@ -2,9 +2,9 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import createClient from "openapi-fetch";
 import { paths } from "@artifacts/shared";
-import { gatherAndBankScenario, GatherContext } from "./scenarios";
 import { getCharacters } from "./api";
 import { hooks, routes } from "./routes";
+import { CharacterInfo } from "./types";
 
 const authToken = process.env.auth_token;
 if (!authToken) {
@@ -25,10 +25,9 @@ const characters = await getCharacters();
 if (!characters) {
   throw new Error("No characters found");
 }
-
 const characterNames = characters.map((x) => x.name);
 
-const characterInfo: CharacterInfo[] = characterNames.map((characterName) => {
+export const characterInfo: CharacterInfo[] = characterNames.map((characterName) => {
   // if name does not exist in db?
   if (characterName === "asdfadsf") {
     // activity = stored activity
@@ -42,29 +41,6 @@ const characterInfo: CharacterInfo[] = characterNames.map((characterName) => {
 // gatherAndBankScenario({ characterName: "Rascal", location: "Gudgeon_Fishing" });
 // gatherAndBankScenario({ characterName: "Piper", location: "Sunflower" });
 // gatherAndBankScenario({ characterName: "Sadie", location: "Ash_Tree" });
-
-type Activity = { name: "gather"; context: Omit<GatherContext, "characterName"> };
-
-interface CharacterInfo {
-  characterName: string;
-  activity: Activity | null;
-  // currqueue ?
-}
-
-const factory = ({ characterName, activity }: CharacterInfo) => {
-  // some graceful shutdown of character ...
-  if (!activity) return;
-  const context = { characterName, ...activity.context };
-
-  switch (activity?.name) {
-    case "gather":
-      gatherAndBankScenario(context);
-      break;
-    default:
-      console.log("Invalid activity:", activity.name);
-      break;
-  }
-};
 
 const fastify = Fastify();
 

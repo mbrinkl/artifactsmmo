@@ -1,4 +1,7 @@
 import { FastifyInstance } from "fastify";
+import { scenarioFactory } from "../scenarios";
+import { CharacterInfo } from "../types";
+import { characterInfo } from "..";
 
 export const hooks = (fastify: FastifyInstance) => {
   fastify.addHook("onRequest", (req, res, done) => {
@@ -22,12 +25,13 @@ export const hooks = (fastify: FastifyInstance) => {
 };
 
 export const routes = (fastify: FastifyInstance) => {
-  fastify.get("/dashboard-data", (req, res) => {
-    res.send("gg idiot");
+  fastify.get<{ Reply: CharacterInfo[] }>("/dashboard-data", (req, res) => {
+    res.send(characterInfo);
   });
 
-  fastify.post("/update-activity", (req, res) => {
-    // get activity data from req and character name
-    res.send("lol gg idiot again");
+  fastify.post<{ Body: CharacterInfo }>("/update-activity", (req, res) => {
+    // scenarioFactory(req.body);
+    console.log("got data...", req.body);
+    res.send();
   });
 };
