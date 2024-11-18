@@ -1,4 +1,4 @@
-import { components } from "./schema";
+import { components } from "@artifacts/shared";
 
 export interface ActionResultData {
   character: Character;

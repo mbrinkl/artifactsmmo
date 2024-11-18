@@ -1,13 +1,13 @@
-import { deposit, gather, move } from "../actions";
+import { deposit, gather, move } from "../api";
 import { coords, GatherLocation } from "../config";
 import { PipelineConfig, PipelineContext, PipelineItem, runPipeline } from "../pipeline";
 import { ActionResultData } from "../types";
 
-interface Context extends PipelineContext {
+export interface GatherContext extends PipelineContext {
   location: GatherLocation;
 }
 
-const onExecuted = (res: ActionResultData | null, context: Context): PipelineItem[] => {
+const onExecuted = (res: ActionResultData | null, context: GatherContext): PipelineItem[] => {
   if (!res || !res.character.inventory) return [];
 
   const totalQuantity = res.character.inventory.reduce((a, b) => a + b.quantity, 0);
@@ -34,8 +34,8 @@ const onExecuted = (res: ActionResultData | null, context: Context): PipelineIte
   }
 };
 
-export const gatherAndBankScenario = async (context: Context) => {
-  const config: PipelineConfig<Context> = {
+export const gatherAndBankScenario = async (context: GatherContext) => {
+  const config: PipelineConfig<GatherContext> = {
     pipeline: [
       { action: move, payload: coords[context.location] },
       { action: gather, onExecuted },
