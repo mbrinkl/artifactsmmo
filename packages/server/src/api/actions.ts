@@ -61,14 +61,15 @@ const handle = <TData extends ActionResultData>(
   ignoreCodes?: number[],
 ): TData | null => {
   if (error) {
-    console.error("error", error.error);
     if (ignoreCodes && ignoreCodes.includes(error.error.code)) {
+      console.error("ignoring error", error.error);
       return null;
     }
-    throw new Error(`error: ${error.error.code} ${error.error.message}`);
+    throw new Error(`${error.error.code} ${error.error.message}`);
   }
   if (!data) {
     throw new Error("Unexpected data and error missing");
   }
+
   return data;
 };
