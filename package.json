@@ -2,7 +2,9 @@
   "name": "artifacts",
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/shared",
+    "packages/client",
+    "packages/server"
   ],
   "scripts": {
     "openapi-gen": "openapi-typescript https://api.artifactsmmo.com/openapi.json -o ./packages/shared/schema.ts",

@@ -9,7 +9,7 @@ const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <MantineProvider>
+    <MantineProvider defaultColorScheme="dark">
       <QueryClientProvider client={queryClient}>
         <App />
       </QueryClientProvider>

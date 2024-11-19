@@ -1,9 +1,10 @@
 import { FastifyInstance } from "fastify";
-import { scenarioFactory } from "../scenarios";
+import { loopFactory } from "../loops";
 import { characterContext, db } from "..";
 import { CharacterInfo } from "@artifacts/shared";
 import { CharacterContext } from "../types";
 import { characterActivityTable } from "../db/schema";
+import { eq } from "drizzle-orm";
 
 export const hooks = (fastify: FastifyInstance) => {
   fastify.addHook("onRequest", (req, res, done) => {
@@ -45,14 +46,21 @@ export const routes = (fastify: FastifyInstance) => {
       activity: body.activity,
     };
     characterContext[ctx.characterName] = ctx;
-    scenarioFactory(ctx);
+    loopFactory(ctx);
 
+    const dbResult = await db.query.characterActivityTable.findFirst({
+      where: eq(characterActivityTable.name, ctx.characterName),
+    });
     const storeData: typeof characterActivityTable.$inferInsert = {
       name: ctx.characterName,
       activityName: ctx.activity?.name || null,
       activityContext: ctx.activity?.context ? JSON.stringify(ctx.activity.context) : null,
     };
-    await db.insert(characterActivityTable).values(storeData);
+    if (dbResult) {
+      await db.update(characterActivityTable).set(storeData).where(eq(characterActivityTable.name, ctx.characterName));
+    } else {
+      await db.insert(characterActivityTable).values(storeData);
+    }
 
     res.send(body);
   });

@@ -1,16 +1,17 @@
 import { GatherLocation, gatherLocations } from "./locations";
 
+export const craftSourceItems = ["copper_ore"] as const;
+export const craftProductItems = ["copper"] as const;
+
 export interface GatherContext {
   location: GatherLocation;
 }
-
-// placeholder for testing
-const testings = ["a", "b"] as const;
-export interface OtherContext {
-  testing: (typeof testings)[number];
+export interface CraftContext {
+  sourceItem: (typeof craftSourceItems)[number];
+  productItem: (typeof craftProductItems)[number];
 }
 
-export type Activity = { name: "gather"; context: GatherContext } | { name: "other"; context: OtherContext };
+export type Activity = { name: "gather"; context: GatherContext } | { name: "craft"; context: CraftContext };
 export type ActivityName = Activity["name"];
 
 type ExtractPropertyNames<T> = {
@@ -22,6 +23,6 @@ type ActivityMap = {
 
 export const possibleContextsMap: ActivityMap = {
   gather: { location: gatherLocations },
-  other: { testing: testings },
+  craft: { sourceItem: craftSourceItems, productItem: craftProductItems },
 };
 export const possibileActivityNames = Object.keys(possibleContextsMap);

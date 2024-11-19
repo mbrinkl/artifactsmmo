@@ -1,8 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { CharacterInfo } from "@artifacts/shared";
+import { serverUrl } from "../config";
 
 const getDashboardData = async (token: string) => {
-  const response = await fetch("http://localhost:3000/dashboard-data", {
+  const response = await fetch(serverUrl + "/dashboard-data", {
     headers: { Authorization: "Bearer " + token },
   });
   if (!response.ok) {
@@ -13,7 +14,7 @@ const getDashboardData = async (token: string) => {
 };
 
 const updateActivity = async (token: string, characterInfo: CharacterInfo) => {
-  const response = await fetch("http://localhost:3000/update-activity", {
+  const response = await fetch(serverUrl + "/update-activity", {
     method: "POST",
     body: JSON.stringify(characterInfo),
     headers: { Authorization: "Bearer " + token },
@@ -25,7 +26,6 @@ const updateActivity = async (token: string, characterInfo: CharacterInfo) => {
   return await response.json();
 };
 
-// poll? refetchInterval
 export const useGetDashboardDataQuery = (token: string) =>
   useQuery({ queryKey: ["dashboard-data"], queryFn: () => getDashboardData(token), refetchInterval: 5000 });
 

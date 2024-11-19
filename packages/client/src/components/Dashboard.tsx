@@ -30,7 +30,7 @@ export const Dashboard = (props: DashboardProps) => {
   return (
     <Stack>
       {data.map((x) => (
-        <DashboardCharacter x={x} update={update} />
+        <DashboardCharacter key={x.characterName} x={x} update={update} />
       ))}
     </Stack>
   );

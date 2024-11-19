@@ -7,7 +7,7 @@ export const move = async (name: string, destintation: Destination) => {
     body: destintation,
   });
 
-  return handle(data?.data, error, [490]); // ignore if already at destination
+  return handle(data?.data, error, [490]);
 };
 
 export const fight = async (name: string) => {
@@ -20,6 +20,22 @@ export const fight = async (name: string) => {
 export const gather = async (name: string) => {
   const { data, error } = await client.POST("/my/{name}/action/gathering", {
     params: { path: { name } },
+  });
+  return handle(data?.data, error);
+};
+
+export const craft = async (name: string, item: Drop) => {
+  const { data, error } = await client.POST("/my/{name}/action/crafting", {
+    params: { path: { name } },
+    body: item,
+  });
+  return handle(data?.data, error);
+};
+
+export const withdraw = async (name: string, item: Drop) => {
+  const { data, error } = await client.POST("/my/{name}/action/bank/withdraw", {
+    params: { path: { name } },
+    body: item,
   });
   return handle(data?.data, error);
 };
@@ -39,11 +55,11 @@ interface Err {
   };
 }
 
-const handle = <T extends ActionResultData>(
-  data: T | undefined,
+const handle = <TData extends ActionResultData>(
+  data: TData | undefined,
   error: Err | undefined,
   ignoreCodes?: number[],
-): T | null => {
+): TData | null => {
   if (error) {
     console.error("error", error.error);
     if (ignoreCodes && ignoreCodes.includes(error.error.code)) {
