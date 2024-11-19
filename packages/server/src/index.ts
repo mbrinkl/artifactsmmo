@@ -45,10 +45,10 @@ characterNames.forEach((characterName) => {
     console.log(characterName, "Restored Activity - ", stored.activityName, stored.activityContext);
     const storedContext = stored.activityContext ? JSON.parse(stored.activityContext) : null;
     const storedActivity: Activity = { name: stored.activityName as ActivityName, context: storedContext };
-    characterContext[characterName] = { characterName, activity: storedActivity, queue: [] };
+    characterContext[characterName] = { characterName, activity: storedActivity, queue: [], version: 0 };
     scenarioFactory(characterContext[characterName]);
   } else {
-    characterContext[characterName] = { characterName, activity: null, queue: [] };
+    characterContext[characterName] = { characterName, activity: null, queue: [], version: 0 };
   }
 });
 

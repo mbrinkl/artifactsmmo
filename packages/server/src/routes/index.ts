@@ -34,9 +34,18 @@ export const routes = (fastify: FastifyInstance) => {
 
   fastify.post("/update-activity", async (req, res) => {
     const body = JSON.parse(req.body as string) as CharacterInfo;
-    const ctx: CharacterContext = { ...body, queue: [] };
-    scenarioFactory(ctx);
+    const existingContext = characterContext[body.characterName];
+    if (!existingContext) {
+      return res.status(400).send("Invalid character name: " + body.characterName);
+    }
+    const ctx: CharacterContext = {
+      ...existingContext,
+      queue: [],
+      version: existingContext.version + 1,
+      activity: body.activity,
+    };
     characterContext[ctx.characterName] = ctx;
+    scenarioFactory(ctx);
 
     const storeData: typeof characterActivityTable.$inferInsert = {
       name: ctx.characterName,

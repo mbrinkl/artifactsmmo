@@ -1,13 +1,8 @@
-import { deposit, gather, getCharacter, move } from "../api";
-import { coords, GatherLocation, ActionResultData } from "@artifacts/shared";
-import { delay, QueueItem, runQueue } from "../queue";
-import { CharacterContext } from "../types";
+import { deposit, gather, move } from "../api";
+import { coords, ActionResultData, GatherContext } from "@artifacts/shared";
+import { QueueItem } from "../queue";
 
-export interface GatherContext {
-  location: GatherLocation;
-}
-
-const onExecuted = (res: ActionResultData | null, context: GatherContext): QueueItem[] => {
+export const gatherAndBankScenario = (res: ActionResultData | null, context: GatherContext): QueueItem[] => {
   if (!res || !res.character.inventory) return [];
 
   const totalQuantity = res.character.inventory.reduce((a, b) => a + b.quantity, 0);
@@ -24,22 +19,12 @@ const onExecuted = (res: ActionResultData | null, context: GatherContext): Queue
     return [
       { action: move, payload: coords["Bank"] },
       ...depositAllPipeline,
-      { action: move, payload: coords[context.location], onExecuted },
+      { action: move, payload: coords[context.location], onExecuted: gatherAndBankScenario },
     ];
   }
 
   // else keep mining it up
   else {
-    return [{ action: gather, onExecuted }];
+    return [{ action: gather, onExecuted: gatherAndBankScenario }];
   }
-};
-
-export const gatherAndBankScenario = async (ctx: CharacterContext) => {
-  const initialCharacterState = await getCharacter(ctx.characterName);
-  if (initialCharacterState.cooldown) {
-    console.log(ctx.characterName, "Awaiting existing cooldown:", initialCharacterState.cooldown);
-    await delay(initialCharacterState.cooldown * 1000);
-  }
-  ctx.queue = onExecuted({ character: initialCharacterState }, ctx.activity?.context as GatherContext);
-  await runQueue(ctx);
 };

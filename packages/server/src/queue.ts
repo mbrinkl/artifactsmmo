@@ -1,5 +1,6 @@
 import { ActionResultData } from "@artifacts/shared";
 import { CharacterContext } from "./types";
+import { characterContext } from ".";
 
 export interface QueueItem<TContext = any, T = any> {
   action: (name: string, payload?: T) => Promise<ActionResultData | null>;
@@ -7,8 +8,28 @@ export interface QueueItem<TContext = any, T = any> {
   onExecuted?: (result: ActionResultData | null, context: TContext) => QueueItem<unknown>[];
 }
 
-export const delay = (ms: number): Promise<void> => {
+export const delayMs = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+export const delayUntil = (inputDate: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const targetTime = new Date(inputDate).getTime();
+    if (isNaN(targetTime)) return reject(new Error("Invalid date format."));
+
+    const now = Date.now();
+    if (now >= targetTime) return resolve();
+
+    const interval = setInterval(
+      () => {
+        if (Date.now() >= targetTime) {
+          clearInterval(interval);
+          resolve();
+        }
+      },
+      Math.min(targetTime - now, 1000),
+    );
+  });
 };
 
 export const runQueue = async (ctx: CharacterContext) => {
@@ -29,14 +50,25 @@ export const runQueue = async (ctx: CharacterContext) => {
 
   const next = nextItem.onExecuted?.(result, ctx.activity?.context);
   if (next) {
-    ctx.queue = ctx.queue.concat(next);
+    if (ctx.version === characterContext[ctx.characterName].version) {
+      ctx.queue = ctx.queue.concat(next);
+    } else {
+      console.log("early exit lol");
+      return;
+    }
     log(`Updated pipeline: [ ${ctx.queue.map((x) => x.action.name).join()} ]`);
   }
 
   log("cooldown:", result?.character.cooldown || "none");
 
   if (result?.character.cooldown) {
-    await delay(result.character.cooldown * 1000);
+    await delayMs(result.character.cooldown * 1000);
   }
+
+  if (ctx.version !== characterContext[ctx.characterName].version) {
+    console.log("early exit");
+    return;
+  }
+
   await runQueue(ctx);
 };
