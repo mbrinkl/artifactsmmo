@@ -20,15 +20,7 @@ export const delayUntil = (inputDate: string): Promise<void> => {
     const now = Date.now();
     if (now >= targetTime) return resolve();
 
-    const interval = setInterval(
-      () => {
-        if (Date.now() >= targetTime) {
-          clearInterval(interval);
-          resolve();
-        }
-      },
-      Math.min(targetTime - now, 1000),
-    );
+    setTimeout(resolve, targetTime - now);
   });
 };
 
