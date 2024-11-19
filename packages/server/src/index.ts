@@ -38,10 +38,6 @@ const characterNames = characters.map((x) => x.name);
 export const characterContext: Record<string, CharacterContext> = {};
 
 const storedCharacterActivities = await db.select().from(characterActivityTable);
-console.log(
-  "stored...",
-  storedCharacterActivities.map((x) => x.name),
-);
 
 characterNames.forEach((characterName) => {
   const stored = storedCharacterActivities.find((x) => x.name === characterName);
