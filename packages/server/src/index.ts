@@ -4,7 +4,7 @@ import fastifyStatic from "@fastify/static";
 import createClient from "openapi-fetch";
 import { Activity, ActivityName, DEFAULT_PORT, paths } from "@artifacts/shared";
 import { getCharacters } from "./api";
-import { hooks, routes } from "./routes";
+import { routes } from "./routes";
 import { CharacterContext } from "./types";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -65,7 +65,6 @@ if (process.env.NODE_ENV === "development") {
   });
 }
 
-await fastify.register(hooks);
 await fastify.register(routes);
 
 fastify.listen({ port: DEFAULT_PORT, host: "0.0.0.0" }, (err) => {

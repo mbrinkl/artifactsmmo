@@ -27,7 +27,12 @@ const updateActivity = async (token: string, characterInfo: CharacterInfo) => {
 };
 
 export const useGetDashboardDataQuery = (token: string) =>
-  useQuery({ queryKey: ["dashboard-data"], queryFn: () => getDashboardData(token), refetchInterval: 5000 });
+  useQuery({
+    queryKey: ["dashboard-data"],
+    queryFn: () => getDashboardData(token),
+    refetchInterval: 5000,
+    retry: false,
+  });
 
 export const useUpdateActivityMutation = () =>
   useMutation({

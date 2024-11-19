@@ -6,7 +6,7 @@ import { CharacterContext } from "../types";
 import { characterActivityTable } from "../db/schema";
 import { eq } from "drizzle-orm";
 
-export const hooks = (fastify: FastifyInstance) => {
+export const routes = (fastify: FastifyInstance) => {
   fastify.addHook("onRequest", (req, res, done) => {
     const authHeader = req.headers["authorization"];
 
@@ -25,9 +25,7 @@ export const hooks = (fastify: FastifyInstance) => {
 
     done();
   });
-};
 
-export const routes = (fastify: FastifyInstance) => {
   fastify.get("/dashboard-data", (req, res) => {
     // TODO: maybe strip queue
     res.send(Object.values(characterContext));
