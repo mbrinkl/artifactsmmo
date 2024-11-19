@@ -72,6 +72,7 @@ export const DashboardCharacter = ({ x, update }: DashboardCharacterProps) => {
           {Object.entries(possibleContextsMap[selectedActivity]).map(([key, value]) => {
             return (
               <Select
+                key={key}
                 label={key}
                 data={value as string[]}
                 value={(selectedContext as any)[key]}
