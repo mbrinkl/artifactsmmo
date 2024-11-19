@@ -1,12 +1,16 @@
-import { Destination } from "./types";
+import { Destination } from "./derived";
 
-export type GatherLocation =
-  | "Copper_Rocks"
-  | "Iron_Rocks"
-  | "Sunflower"
-  | "Gudgeon_Fishing"
-  | "Shrimp_Fishing"
-  | "Ash_Tree";
+export const gatherLocations = [
+  "Copper_Rocks",
+  "Iron_Rocks",
+  "Sunflower",
+  "Gudgeon_Fishing",
+  "Shrimp_Fishing",
+  "Ash_Tree",
+] as const;
+
+export type GatherLocation = (typeof gatherLocations)[number];
+
 export type MapLocation = "Bank" | "GE" | GatherLocation;
 
 export const coords: Record<MapLocation, Destination> = {
