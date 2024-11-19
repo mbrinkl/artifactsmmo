@@ -1,4 +1,4 @@
-import { Button, Input } from "@mantine/core";
+import { Button, Center, Container, Input, Stack } from "@mantine/core";
 import { useState } from "react";
 
 interface LoginProps {
@@ -16,9 +16,15 @@ export const Login = (props: LoginProps) => {
   };
 
   return (
-    <form onSubmit={onSubmit}>
-      <Input value={value} onChange={(e) => setValue(e.target.value)} />
-      <Button type="submit">submit</Button>
-    </form>
+    <Container size="xs" h="100dvh">
+      <Center h="100%">
+        <form onSubmit={onSubmit}>
+          <Stack>
+            <Input placeholder="token" value={value} onChange={(e) => setValue(e.target.value)} />
+            <Button type="submit">submit</Button>
+          </Stack>
+        </form>
+      </Center>
+    </Container>
   );
 };

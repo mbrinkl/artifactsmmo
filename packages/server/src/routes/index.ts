@@ -46,19 +46,16 @@ export const routes = (fastify: FastifyInstance) => {
     characterContext[ctx.characterName] = ctx;
     loopFactory(ctx);
 
-    const dbResult = await db.query.characterActivityTable.findFirst({
-      where: eq(characterActivityTable.name, ctx.characterName),
-    });
     const storeData: typeof characterActivityTable.$inferInsert = {
       name: ctx.characterName,
       activityName: ctx.activity?.name || null,
       activityContext: ctx.activity?.context ? JSON.stringify(ctx.activity.context) : null,
     };
-    if (dbResult) {
-      await db.update(characterActivityTable).set(storeData).where(eq(characterActivityTable.name, ctx.characterName));
-    } else {
-      await db.insert(characterActivityTable).values(storeData);
-    }
+
+    await db.insert(characterActivityTable).values(storeData).onConflictDoUpdate({
+      target: characterActivityTable.id,
+      set: storeData,
+    });
 
     res.send(body);
   });

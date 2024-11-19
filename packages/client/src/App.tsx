@@ -2,6 +2,7 @@ import { useState } from "react";
 import { tokenStorageKey } from "./config";
 import { Login } from "./components/Login";
 import { Dashboard } from "./components/Dashboard";
+import { Button, Container } from "@mantine/core";
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem(tokenStorageKey));
@@ -21,10 +22,10 @@ const App = () => {
   }
 
   return (
-    <div style={{ height: "100dvh", display: "flex", flexDirection: "column" }}>
-      <button onClick={clearToken}>Clear Token</button>
+    <Container>
+      <Button onClick={clearToken}>Clear Token</Button>
       <Dashboard token={token} />
-    </div>
+    </Container>
   );
 };
 
