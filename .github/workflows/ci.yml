@@ -38,8 +38,8 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           password: ${{ secrets.REMOTE_PASSWORD }}
-          target: ./dist/
-          source: ./dist/*
+          target: ./
+          source: ./dist
 
       - name: Execute remote commands
         uses: appleboy/ssh-action@v0.1.2
@@ -49,7 +49,3 @@ jobs:
           password: ${{ secrets.REMOTE_PASSWORD }}
           script: |
             pm2 restart artifacts
-
-      # Clean up SSH key
-      - name: Remove SSH key
-        run: rm -f ~/.ssh/id_rsa
