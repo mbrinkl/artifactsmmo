@@ -1,12 +1,10 @@
 {
   "name": "@artifacts/server",
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
     "dev": "cross-env NODE_ENV=development tsx watch --clear-screen=false --env-file=../../.env src/index.ts",
-    "prod": "cross-env NODE_ENV=production tsx --env-file=../../.env src/index.ts",
-    "build": "npm run db:push",
+    "build": "npm run db:generate && esbuild src/index.ts --bundle --outdir=dist --platform=node",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
@@ -22,6 +20,7 @@
   "devDependencies": {
     "cross-env": "^7.0.3",
     "drizzle-kit": "^0.28.1",
+    "esbuild": "^0.24.0",
     "tsx": "^4.19.2"
   }
 }

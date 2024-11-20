@@ -1,6 +1,5 @@
 {
   "name": "artifacts",
-  "type": "module",
   "workspaces": [
     "packages/shared",
     "packages/client",
@@ -11,8 +10,9 @@
     "server": "npm run dev --workspace=packages/server",
     "client": "npm run dev --workspace=packages/client",
     "dev": "concurrently -c cyan,magenta npm:server npm:client",
-    "prod": "npm run prod --workspace=packages/server",
+    "prod": "cross-env NODE_ENV=production node --env-file=.env dist/index.js",
     "build": "npm run build --workspaces",
+    "postbuild": "rm -rf ./dist && cp -r packages/server/dist/ ./dist && cp -r packages/client/dist ./dist/static && cp -r packages/server/migrations ./dist/migrations",
     "lint": "eslint .",
     "typecheck": "npm run typecheck --workspaces",
     "check": "npm run lint && npm run typecheck"
@@ -21,6 +21,7 @@
     "@eslint/js": "^9.15.0",
     "@types/node": "^22.9.0",
     "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3",
     "eslint": "^9.14.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",

@@ -22,7 +22,7 @@ export class ServerState {
 
     characterNames.forEach((characterName) => {
       const stored = storedCharacterActivities.find((x) => x.name === characterName);
-      if (stored) {
+      if (stored && stored.activityName !== null && stored.activityContext !== null) {
         console.log(characterName, "Restored Activity - ", stored.activityName, stored.activityContext);
         const storedContext = stored.activityContext ? JSON.parse(stored.activityContext) : null;
         const storedActivity: Activity = { name: stored.activityName as ActivityName, context: storedContext };

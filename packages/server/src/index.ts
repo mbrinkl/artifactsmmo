@@ -4,9 +4,9 @@ import fastifyStatic from "@fastify/static";
 import createClient from "openapi-fetch";
 import { DEFAULT_PORT, paths } from "@artifacts/shared";
 import { routes } from "./routes";
-import path, { dirname } from "path";
-import { fileURLToPath } from "url";
+import path from "path";
 import { drizzle } from "drizzle-orm/libsql";
+import { migrate } from "drizzle-orm/libsql/migrator";
 import * as dbSchema from "./db/schema";
 import { ServerState } from "./state";
 
@@ -27,26 +27,28 @@ export const client = createClient<paths>({
 });
 
 export const serverState = new ServerState();
-await serverState.initialize();
-
 const fastify = Fastify();
 
-if (process.env.NODE_ENV === "development") {
-  await fastify.register(fastifyCors);
-} else {
-  await fastify.register(fastifyStatic, {
-    root: path.join(dirname(fileURLToPath(import.meta.url)), "../../client/dist"),
-  });
-  fastify.get("/", (req, res) => {
-    res.sendFile("index.html");
-  });
-}
-
-await fastify.register(routes);
-
-fastify.listen({ port: DEFAULT_PORT, host: "0.0.0.0" }, (err) => {
-  if (err) {
-    fastify.log.error(err);
-    process.exit(1);
+const main = async () => {
+  await migrate(db, { migrationsFolder: path.join(__dirname, "./migrations") });
+  await serverState.initialize();
+  if (process.env.NODE_ENV === "development") {
+    await fastify.register(fastifyCors);
+  } else {
+    await fastify.register(fastifyStatic, {
+      root: path.join(__dirname, "./static"),
+    });
+    fastify.get("/", (req, res) => {
+      res.sendFile("index.html");
+    });
   }
-});
+  await fastify.register(routes);
+  fastify.listen({ port: DEFAULT_PORT, host: "0.0.0.0" }, (err) => {
+    if (err) {
+      fastify.log.error(err);
+      process.exit(1);
+    }
+  });
+};
+
+main();
