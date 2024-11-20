@@ -13,6 +13,7 @@ export interface CraftContext {
 
 export type Activity = { name: "gather"; context: GatherContext } | { name: "craft"; context: CraftContext };
 export type ActivityName = Activity["name"];
+export type ActivityContext = Activity["context"];
 
 type ExtractPropertyNames<T> = {
   [Key in keyof T]: unknown;

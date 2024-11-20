@@ -1,8 +1,8 @@
 import { craft, deposit, move, withdraw } from "../api";
 import { coords, ActionResultData, CraftContext } from "@artifacts/shared";
-import { QueueItem } from "../queue";
+import { QueueItem } from "../state/queue";
 
-export const craftLoop = (res: ActionResultData | null, context: CraftContext): QueueItem[] => {
+export const craftLoop = (res: ActionResultData | null, context: CraftContext): QueueItem<CraftContext>[] => {
   if (!res || !res.character.inventory) return [];
 
   // need to infer...
@@ -27,11 +27,10 @@ export const craftLoop = (res: ActionResultData | null, context: CraftContext): 
       }));
 
     return [
-      { action: move, payload: coords["Bank"] },
+      { action: move, payload: coords["Bank"] } satisfies QueueItem<typeof move>,
       ...depositNonSourceItems,
 
-      // TODO: need to handle attempting to withdraw failure
-      //
+      // TODO: only withdraws the amount of space before deposit
       { action: withdraw, payload: { code: context.sourceItem, quantity: space }, onExecuted: craftLoop },
     ];
   }

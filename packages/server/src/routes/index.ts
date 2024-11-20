@@ -1,10 +1,7 @@
 import { FastifyInstance } from "fastify";
-import { loopFactory } from "../loops";
-import { characterContext, db } from "..";
+import { serverState, db } from "..";
 import { CharacterInfo } from "@artifacts/shared";
-import { CharacterContext } from "../types";
 import { characterActivityTable } from "../db/schema";
-import { eq } from "drizzle-orm";
 
 export const routes = (fastify: FastifyInstance) => {
   fastify.addHook("onRequest", (req, res, done) => {
@@ -27,24 +24,18 @@ export const routes = (fastify: FastifyInstance) => {
   });
 
   fastify.get("/dashboard-data", (req, res) => {
-    // TODO: maybe strip queue
-    res.send(Object.values(characterContext));
+    res.send(Object.values(serverState.characterContext));
   });
 
   fastify.post("/update-activity", async (req, res) => {
-    const body = JSON.parse(req.body as string) as CharacterInfo;
-    const existingContext = characterContext[body.characterName];
+    const ctx = JSON.parse(req.body as string) as CharacterInfo;
+
+    const existingContext = serverState.characterContext[ctx.characterName];
     if (!existingContext) {
-      return res.status(400).send("Invalid character name: " + body.characterName);
+      return res.status(400).send("Invalid character name: " + ctx.characterName);
     }
-    const ctx: CharacterContext = {
-      ...existingContext,
-      queue: [],
-      version: existingContext.version + 1,
-      activity: body.activity,
-    };
-    characterContext[ctx.characterName] = ctx;
-    loopFactory(ctx);
+
+    serverState.update(ctx);
 
     const storeData: typeof characterActivityTable.$inferInsert = {
       name: ctx.characterName,
@@ -53,13 +44,10 @@ export const routes = (fastify: FastifyInstance) => {
     };
 
     await db.insert(characterActivityTable).values(storeData).onConflictDoUpdate({
-      target: characterActivityTable.id,
+      target: characterActivityTable.name,
       set: storeData,
     });
 
-    res.send(body);
+    res.send(ctx);
   });
-
-  // stop-after-task ?
-  // stop-after-queue
 };

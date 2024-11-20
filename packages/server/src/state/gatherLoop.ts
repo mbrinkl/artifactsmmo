@@ -1,8 +1,8 @@
 import { deposit, gather, move } from "../api";
 import { coords, ActionResultData, GatherContext } from "@artifacts/shared";
-import { QueueItem } from "../queue";
+import { QueueItem } from "./queue";
 
-export const gatherLoop = (res: ActionResultData | null, context: GatherContext): QueueItem[] => {
+export const gatherLoop = (res: ActionResultData | null, context: GatherContext): QueueItem<GatherContext>[] => {
   if (!res || !res.character.inventory) return [];
 
   const totalQuantity = res.character.inventory.reduce((a, b) => a + b.quantity, 0);
