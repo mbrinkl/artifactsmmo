@@ -10,8 +10,6 @@ import { migrate } from "drizzle-orm/libsql/migrator";
 import * as dbSchema from "./db/schema";
 import { ServerState } from "./state";
 
-console.log("LOGGING TEST");
-
 const authToken = process.env.auth_token;
 if (!authToken) {
   throw new Error("Auth token not set in environment variables");
