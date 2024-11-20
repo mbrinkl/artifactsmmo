@@ -1,4 +1,4 @@
-import { Stack } from "@mantine/core";
+import { Loader, Stack, Text } from "@mantine/core";
 import { CharacterInfo } from "@artifacts/shared";
 import { useGetDashboardDataQuery, useUpdateActivityMutation } from "../api";
 import { DashboardCharacter } from "./DashboardCharacter";
@@ -16,21 +16,21 @@ export const Dashboard = (props: DashboardProps) => {
   };
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return <Text>Error: {error.message}</Text>;
   }
 
   if (!data) {
-    return <div>Loading...</div>;
+    return <Loader />;
   }
 
   if (data.length === 0) {
-    return <div>No characters in response</div>;
+    return <Text>No characters in response</Text>;
   }
 
   return (
     <Stack>
-      {data.map((x) => (
-        <DashboardCharacter key={x.characterName} x={x} update={update} />
+      {data.map((character) => (
+        <DashboardCharacter key={character.characterName} x={character} update={update} />
       ))}
     </Stack>
   );

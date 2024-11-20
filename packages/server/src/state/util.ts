@@ -1,6 +1,7 @@
 import { Activity, Character } from "@artifacts/shared";
 import { craftLoop } from "./craftLoop";
 import { gatherLoop } from "./gatherLoop";
+import { QueueItem } from "./queue";
 
 export const delayMs = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -18,7 +19,7 @@ export const delayUntil = (inputDate: string): Promise<void> => {
   });
 };
 
-export const initialQueueFactory = (character: Character, activity: Activity) => {
+export const initialQueueFactory = (character: Character, activity: Activity): QueueItem[] => {
   const res = { character };
   const { name, context } = activity;
 

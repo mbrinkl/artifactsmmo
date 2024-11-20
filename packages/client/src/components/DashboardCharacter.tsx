@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { ActivityName, CharacterInfo, possibileActivityNames, possibleContextsMap } from "@artifacts/shared";
-import { Button, Select, Text } from "@mantine/core";
+import { Activity, ActivityName, CharacterInfo, possibileActivityNames, possibleContextsMap } from "@artifacts/shared";
+import { Button, Paper, Select, Text } from "@mantine/core";
+import styles from "./DashboardChartacter.module.css";
 
 interface DashboardCharacterProps {
-  x: CharacterInfo;
+  character: CharacterInfo;
   update: (info: CharacterInfo) => void;
 }
 
-export const DashboardCharacter = ({ x, update }: DashboardCharacterProps) => {
+export const DashboardCharacter = ({ character, update }: DashboardCharacterProps) => {
   const [selectedActivity, setSelectedActivity] = useState<ActivityName | null>(null);
   const [selectedContext, setSelectedContext] = useState<object | null>(null);
 
@@ -35,31 +36,26 @@ export const DashboardCharacter = ({ x, update }: DashboardCharacterProps) => {
   const updateActivity = () => {
     if (!selectedActivity || !selectedContext) return;
     update({
-      characterName: x.characterName,
-      activity: { name: selectedActivity, context: selectedContext as any },
+      characterName: character.characterName,
+      activity: { name: selectedActivity, context: selectedContext } as Activity,
     });
   };
 
   const clearActivity = () => {
     update({
-      characterName: x.characterName,
+      characterName: character.characterName,
       activity: null,
     });
   };
 
-  const isActive = x.activity !== null;
+  const isActive = character.activity !== null;
 
   return (
-    <div
-      style={{
-        width: "100%",
-        border: isActive ? "3px solid green" : "3px solid red",
-        marginBottom: "5px",
-        marginTop: "5px",
-      }}
-    >
-      <Text size="lg">{x.characterName}</Text>
-      <Text size="md">{x.activity ? x.activity.name + JSON.stringify(x.activity.context) : "None"}</Text>
+    <Paper className={`${styles.container} ${isActive ? styles.active : styles.inactive}`}>
+      <Text size="lg">{character.characterName}</Text>
+      <Text size="md">
+        {character.activity ? character.activity.name + JSON.stringify(character.activity.context) : "None"}
+      </Text>
       <Select
         label="Activity"
         data={possibileActivityNames}
@@ -75,6 +71,7 @@ export const DashboardCharacter = ({ x, update }: DashboardCharacterProps) => {
                 key={key}
                 label={key}
                 data={value as string[]}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 value={(selectedContext as any)[key]}
                 onChange={(v) => onChangeContext(key, v)}
               />
@@ -84,6 +81,6 @@ export const DashboardCharacter = ({ x, update }: DashboardCharacterProps) => {
       )}
       <Button onClick={updateActivity}>Update</Button>
       {isActive && <Button onClick={clearActivity}>Stop</Button>}
-    </div>
+    </Paper>
   );
 };

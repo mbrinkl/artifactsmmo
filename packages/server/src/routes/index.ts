@@ -24,23 +24,23 @@ export const routes = (fastify: FastifyInstance) => {
   });
 
   fastify.get("/dashboard-data", (req, res) => {
-    res.send(Object.values(serverState.characterContext));
+    res.send(serverState.getInfo());
   });
 
   fastify.post("/update-activity", async (req, res) => {
-    const ctx = JSON.parse(req.body as string) as CharacterInfo;
+    const info = JSON.parse(req.body as string) as CharacterInfo;
 
-    const existingContext = serverState.characterContext[ctx.characterName];
+    const existingContext = serverState.ctxMap[info.characterName];
     if (!existingContext) {
-      return res.status(400).send("Invalid character name: " + ctx.characterName);
+      return res.status(400).send("Invalid character name: " + info.characterName);
     }
 
-    serverState.update(ctx);
+    serverState.update(info);
 
     const storeData: typeof characterActivityTable.$inferInsert = {
-      name: ctx.characterName,
-      activityName: ctx.activity?.name || null,
-      activityContext: ctx.activity?.context ? JSON.stringify(ctx.activity.context) : null,
+      name: info.characterName,
+      activityName: info.activity?.name || null,
+      activityContext: info.activity?.context ? JSON.stringify(info.activity.context) : null,
     };
 
     await db.insert(characterActivityTable).values(storeData).onConflictDoUpdate({
@@ -48,6 +48,6 @@ export const routes = (fastify: FastifyInstance) => {
       set: storeData,
     });
 
-    res.send(Object.values(serverState.characterContext));
+    res.send(serverState.getInfo());
   });
 };

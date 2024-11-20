@@ -1,4 +1,4 @@
-import { Activity, ActivityName } from "@artifacts/shared";
+import { Activity, ActivityName, CharacterInfo } from "@artifacts/shared";
 import { db } from "..";
 import { getCharacters } from "../api";
 import { characterActivityTable } from "../db/schema";
@@ -6,15 +6,13 @@ import { Queuey } from "./queue";
 import { CharacterContext } from "../types";
 
 export class ServerState {
-  characterContext: Record<string, CharacterContext>;
-  activeQ: Record<string, Queuey>;
+  ctxMap: Record<string, CharacterContext>;
 
   constructor() {
-    this.characterContext = {};
-    this.activeQ = {};
+    this.ctxMap = {};
   }
 
-  async initialize() {
+  async initialize(): Promise<void> {
     const characters = await getCharacters();
     if (!characters) {
       throw new Error("No characters found");
@@ -35,19 +33,23 @@ export class ServerState {
     });
   }
 
-  update(ctx: CharacterContext) {
-    this.characterContext[ctx.characterName] = ctx;
-    const existingQ = this.activeQ[ctx.characterName];
-    if (existingQ) {
-      existingQ.abort();
+  update(info: CharacterInfo): void {
+    const existing = this.ctxMap[info.characterName];
+    if (existing?.q) {
+      existing.q.abort();
     }
 
-    if (ctx.activity === null) {
+    this.ctxMap[info.characterName] = info;
+    if (this.ctxMap[info.characterName].activity === null) {
       return;
     }
 
-    const queuey = new Queuey(ctx);
-    this.activeQ[ctx.characterName] = queuey;
-    queuey.initialize();
+    const q = new Queuey(info);
+    q.initialize();
+    this.ctxMap[info.characterName].q = q;
+  }
+
+  getInfo(): CharacterInfo[] {
+    return Object.values(this.ctxMap).map((v) => ({ characterName: v.characterName, activity: v.activity }));
   }
 }

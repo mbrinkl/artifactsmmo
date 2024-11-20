@@ -1,5 +1,6 @@
 {
   "name": "@artifacts/server",
+  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "db:push": "drizzle-kit push",

@@ -1,8 +1,8 @@
-import { ActionResultData } from "@artifacts/shared";
-import { CharacterContext } from "../types";
+import { ActionResultData, CharacterInfo } from "@artifacts/shared";
 import { getCharacter } from "../api";
 import { delayMs, delayUntil, initialQueueFactory } from "./util";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface QueueItem<TContext = any, T = any> {
   action: (name: string, payload?: T) => Promise<ActionResultData | null>;
   payload?: T;
@@ -10,12 +10,12 @@ export interface QueueItem<TContext = any, T = any> {
 }
 
 export class Queuey {
-  private ctx: CharacterContext;
+  private info: CharacterInfo;
   private queue: QueueItem[];
   private aborted: boolean;
 
-  constructor(ctx: CharacterContext) {
-    this.ctx = ctx;
+  constructor(ctx: CharacterInfo) {
+    this.info = ctx;
     this.queue = [];
     this.aborted = false;
   }
@@ -27,13 +27,13 @@ export class Queuey {
   }
 
   log(...message: (string | number)[]) {
-    console.log(`${this.ctx.characterName.padEnd(7)}: ${message.map((x) => JSON.stringify(x)).join(" ")}`);
+    console.log(`${this.info.characterName.padEnd(7)}: ${message.map((x) => JSON.stringify(x)).join(" ")}`);
   }
 
   async initialize() {
-    if (!this.ctx.activity) return;
+    if (!this.info.activity) return;
 
-    const initialCharacterState = await getCharacter(this.ctx.characterName);
+    const initialCharacterState = await getCharacter(this.info.characterName);
 
     if (initialCharacterState.cooldown_expiration) {
       this.log("Awaiting existing cooldown");
@@ -47,7 +47,7 @@ export class Queuey {
       return;
     }
 
-    this.queue = initialQueueFactory(initialCharacterState, this.ctx.activity);
+    this.queue = initialQueueFactory(initialCharacterState, this.info.activity);
     await this.execute();
   }
 
@@ -62,12 +62,12 @@ export class Queuey {
 
       this.concurrencyCheck();
       this.log("executing", nextItem?.action.name, nextItem?.payload);
-      const result = await nextItem.action(this.ctx.characterName, nextItem.payload);
+      const result = await nextItem.action(this.info.characterName, nextItem.payload);
 
       // TODO handle null result instead of passing null to onExecuted
 
       // ew non-null assertion
-      const next = nextItem.onExecuted?.(result, this.ctx.activity!.context);
+      const next = nextItem.onExecuted?.(result, this.info.activity!.context);
       if (next) {
         this.concurrencyCheck();
         this.queue = this.queue.concat(next);
