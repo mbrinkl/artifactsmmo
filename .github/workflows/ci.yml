@@ -41,6 +41,7 @@ jobs:
           target: ./dist
           source: ./dist/*
           rm: true
+          strip_components: 1
 
       - name: Execute remote commands
         uses: appleboy/ssh-action@v0.1.2
