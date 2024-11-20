@@ -40,6 +40,7 @@ jobs:
           password: ${{ secrets.REMOTE_PASSWORD }}
           target: ./
           source: ./dist
+          rm: true
 
       - name: Execute remote commands
         uses: appleboy/ssh-action@v0.1.2
