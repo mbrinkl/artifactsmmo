@@ -48,6 +48,6 @@ export const routes = (fastify: FastifyInstance) => {
       set: storeData,
     });
 
-    res.send(ctx);
+    res.send(Object.values(serverState.characterContext));
   });
 };
