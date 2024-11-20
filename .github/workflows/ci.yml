@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  # temporary for testing
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run linting and typechecking
+        run: npm run check
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build project
+        run: npm run build
+
+      - name: Set up SSH key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Upload dist to remote server
+        env:
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_PATH: ${{ secrets.REMOTE_PATH }}
+        run: |
+          scp -i ~/.ssh/id_rsa -r ./dist $REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH
+
+      # Execute commands on the remote server
+      - name: Execute remote commands
+        env:
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+        run: |
+          ssh -i ~/.ssh/id_rsa $REMOTE_USER@$REMOTE_HOST << EOF
+          cd $REMOTE_PATH
+          npm install --production
+          pm2 restart all
+          EOF
+
+      # Clean up SSH key
+      - name: Remove SSH key
+        run: rm -f ~/.ssh/id_rsa
