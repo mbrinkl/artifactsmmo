@@ -32,30 +32,23 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Set up SSH key
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
       - name: Upload dist to remote server
-        env:
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_PATH: ${{ secrets.REMOTE_PATH }}
-        run: |
-          scp -i ~/.ssh/id_rsa -r ./dist $REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH
+        uses: appleboy/scp-action@v0.1.2
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          password: ${{ secrets.REMOTE_PASSWORD }}
+          target: ./dist/
+          source: ./dist/*
 
-      # Execute commands on the remote server
       - name: Execute remote commands
-        env:
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-        run: |
-          ssh -i ~/.ssh/id_rsa $REMOTE_USER@$REMOTE_HOST << EOF
-          cd $REMOTE_PATH
-          npm install --production
-          pm2 restart all
-          EOF
+        uses: appleboy/ssh-action@v0.1.2
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          password: ${{ secrets.REMOTE_PASSWORD }}
+          script: |
+            pm2 restart artifacts
 
       # Clean up SSH key
       - name: Remove SSH key
