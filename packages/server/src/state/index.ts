@@ -25,25 +25,29 @@ export class ServerState {
   }
 
   async initialize(): Promise<void> {
-    // todo parallelize
     console.log("fetching assets");
     const start = Date.now();
-    this.cache.squares = await getMaps();
-    this.cache.items = await getItems();
-    this.cache.resources = await getResources();
+    const [squares, items, resources, characters] = await Promise.all([
+      getMaps(),
+      getItems(),
+      getResources(),
+      getCharacters(),
+    ]);
     console.log("fetching assets in ms:", Date.now() - start);
 
-    const characters = await getCharacters();
-    const characterNames = characters.map((x) => x.name);
+    this.cache.squares = squares;
+    this.cache.items = items;
+    this.cache.resources = resources;
 
+    const characterNames = characters.map((x) => x.name);
     const storedCharacterActivities = await db.select().from(characterActivityTable);
 
     characterNames.forEach((characterName) => {
       const stored = storedCharacterActivities.find((x) => x.name === characterName);
-      if (stored && stored.activityName !== null && stored.activityContext !== null) {
-        console.log(characterName, "Restored Activity - ", stored.activityName, stored.activityContext);
-        const storedContext = stored.activityContext ? JSON.parse(stored.activityContext) : null;
-        const storedActivity: Activity = { name: stored.activityName as ActivityName, context: storedContext };
+      if (stored && stored.activityName !== null && stored.activityParams !== null) {
+        console.log(characterName, "Restored Activity - ", stored.activityName, stored.activityParams);
+        const storedParams = stored.activityParams ? JSON.parse(stored.activityParams) : null;
+        const storedActivity: Activity = { name: stored.activityName as ActivityName, params: storedParams };
         this.update({ characterName, activity: storedActivity });
       } else {
         this.update({ characterName, activity: null });

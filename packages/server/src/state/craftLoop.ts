@@ -1,56 +1,64 @@
-// import { craft, deposit, move, withdraw } from "../api";
-import { ActionResultData, CraftContext } from "@artifacts/shared";
+import { craft, deposit, move, withdraw } from "../api";
+import { ActionResultData, coords, CraftContext, CraftParams } from "@artifacts/shared";
 import { QueueItem } from "../state/queue";
 import { serverState } from "..";
 
-export const craftLoop = (res: ActionResultData | null, context: CraftContext): QueueItem<CraftContext>[] => {
-  if (!res || !res.character.inventory) return [];
-
-  const productItem = serverState.cache.items.find((x) => x.code === context.productCode);
+export const getCraftContext = (params: CraftParams): CraftContext => {
+  const productItem = serverState.cache.items.find((x) => x.code === params.productCode);
   if (!productItem) {
-    return [];
+    throw new Error("Invalid product code.");
   }
   const sourceItems = productItem.craft?.items;
   if (!sourceItems || sourceItems.length === 0) {
-    return [];
+    throw new Error("Item is not craftable.");
+  }
+  const craftSquare = serverState.cache.squares.find(
+    (x) => x.content?.type === "workshop" && x.content.code === productItem.craft?.skill,
+  );
+  if (!craftSquare) {
+    throw new Error("Craft square not found");
   }
 
-  return [];
-  // // need to infer...
-  // // crafting destination
-  // // num items to craft
-  // const loc = { x: 1, y: 5 };
-  // const num = 8;
+  return {
+    productItem,
+    sourceItems,
+    craftSquare,
+  };
+};
 
-  // const max = res.character.inventory_max_items;
-  // const total = res.character.inventory.reduce((a, b) => a + b.quantity, 0);
-  // const space = max - total;
+export const craftLoop = (res: ActionResultData | null, ctx: CraftContext): QueueItem<CraftContext>[] => {
+  if (!res || !res.character.inventory) return [];
 
-  // // if sufficient materials in inv to craft product, craft
-  // const sourceItemInInv = res.character.inventory.find((x) => x.code === context.sourceItem);
+  const max = res.character.inventory_max_items;
+  const total = res.character.inventory.reduce((a, b) => a + b.quantity, 0);
+  const space = max - total;
 
-  // if (!sourceItemInInv || sourceItemInInv.quantity < num) {
-  //   const depositNonSourceItems: QueueItem[] = res.character.inventory
-  //     .filter((x) => x.quantity > 0 && x.code !== context.sourceItem)
-  //     .map(({ code, quantity }) => ({
-  //       action: deposit,
-  //       payload: { code, quantity },
-  //     }));
+  // if sufficient materials in inv to craft product, craft
+  // TODO: just assuming single source items for now
+  const sourceItemInInv = res.character.inventory.find((x) => x.code === ctx.sourceItems[0].code);
 
-  //   return [
-  //     { action: move, payload: coords["Bank"] } satisfies QueueItem<typeof move>,
-  //     ...depositNonSourceItems,
+  if (!sourceItemInInv || sourceItemInInv.quantity < ctx.sourceItems[0].quantity) {
+    const depositNonSourceItems: QueueItem[] = res.character.inventory
+      .filter((x) => x.quantity > 0 && x.code !== ctx.sourceItems[0].code)
+      .map(({ code, quantity }) => ({
+        action: deposit,
+        payload: { code, quantity },
+      }));
 
-  //     // TODO: only withdraws the amount of space before deposit
-  //     { action: withdraw, payload: { code: context.sourceItem, quantity: space }, onExecuted: craftLoop },
-  //   ];
-  // }
+    return [
+      { action: move, payload: coords["Bank"] } satisfies QueueItem<typeof move>,
+      ...depositNonSourceItems,
 
-  // if (res.character.x !== loc.x || res.character.y !== loc.y) {
-  //   return [{ action: move, payload: loc, onExecuted: craftLoop }];
-  // }
+      // TODO: only withdraws the amount of space before deposit
+      { action: withdraw, payload: { code: ctx.sourceItems[0].code, quantity: space }, onExecuted: craftLoop },
+    ];
+  }
 
-  // const craftQuantity = Math.floor(sourceItemInInv.quantity / num);
+  if (res.character.x !== ctx.craftSquare.x || res.character.y !== ctx.craftSquare.y) {
+    return [{ action: move, payload: ctx.craftSquare, onExecuted: craftLoop }];
+  }
 
-  // return [{ action: craft, payload: { code: context.productItem, quantity: craftQuantity }, onExecuted: craftLoop }];
+  const craftQuantity = Math.floor(sourceItemInInv.quantity / ctx.sourceItems[0].quantity);
+
+  return [{ action: craft, payload: { code: ctx.productItem.code, quantity: craftQuantity }, onExecuted: craftLoop }];
 };

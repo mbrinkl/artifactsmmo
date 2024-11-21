@@ -1,6 +1,6 @@
-import { Activity, Character } from "@artifacts/shared";
-import { craftLoop } from "./craftLoop";
-import { gatherLoop } from "./gatherLoop";
+import { Activity, ActivityContext, Character } from "@artifacts/shared";
+import { craftLoop, getCraftContext } from "./craftLoop";
+import { gatherLoop, getGatherContext } from "./gatherLoop";
 import { QueueItem } from "./queue";
 
 export const delayMs = (ms: number): Promise<void> => {
@@ -19,14 +19,17 @@ export const delayUntil = (inputDate: string): Promise<void> => {
   });
 };
 
-export const initialQueueFactory = (character: Character, activity: Activity): QueueItem[] => {
+export const initialQueueFactory = (character: Character, activity: Activity): [QueueItem[], ActivityContext] => {
   const res = { character };
-  const { name, context } = activity;
+  const { name, params } = activity;
+  let ctx: ActivityContext;
 
   switch (name) {
     case "gather":
-      return gatherLoop(res, context);
+      ctx = getGatherContext(params);
+      return [gatherLoop(res, ctx), ctx];
     case "craft":
-      return craftLoop(res, context);
+      ctx = getCraftContext(params);
+      return [craftLoop(res, getCraftContext(params)), ctx];
   }
 };

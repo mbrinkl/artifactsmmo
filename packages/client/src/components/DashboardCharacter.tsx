@@ -38,9 +38,9 @@ export const DashboardCharacter = ({ character, update, initial }: DashboardChar
       setSelectedActivity(null);
     } else {
       if (value === "gather") {
-        setSelectedActivity({ name: value, context: { squareCode: "" } });
+        setSelectedActivity({ name: value, params: { squareCode: "" } });
       } else if (value === "craft") {
-        setSelectedActivity({ name: value, context: { productCode: "" } });
+        setSelectedActivity({ name: value, params: { productCode: "" } });
       }
     }
   };
@@ -48,7 +48,7 @@ export const DashboardCharacter = ({ character, update, initial }: DashboardChar
   const onChangeContext = (property: string, value: string | null) => {
     setSelectedActivity((prev) => {
       if (!prev) return null;
-      return { ...prev, context: { ...prev.context, [property]: value } } as Activity;
+      return { ...prev, params: { ...prev.params, [property]: value } } as Activity;
     });
   };
 
@@ -74,7 +74,7 @@ export const DashboardCharacter = ({ character, update, initial }: DashboardChar
     <Paper className={`${styles.container} ${isActive ? styles.active : styles.inactive}`}>
       <Text size="lg">{character.characterName}</Text>
       <Text size="md">
-        {character.activity ? character.activity.name + JSON.stringify(character.activity.context) : "None"}
+        {character.activity ? character.activity.name + JSON.stringify(character.activity.params) : "None"}
       </Text>
       <Select
         label="Activity"
@@ -85,7 +85,7 @@ export const DashboardCharacter = ({ character, update, initial }: DashboardChar
       {selectedActivity && (
         <div>
           <Text>Activity Context:</Text>
-          {Object.entries(selectedActivity.context).map(([key, value]) => {
+          {Object.entries(selectedActivity.params).map(([key, value]) => {
             return (
               <Select
                 key={key}

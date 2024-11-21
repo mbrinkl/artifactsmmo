@@ -1,19 +1,18 @@
 import { deposit, gather, move } from "../api";
-import { coords, ActionResultData, GatherContext, Destination } from "@artifacts/shared";
+import { coords, ActionResultData, GatherContext, GatherParams } from "@artifacts/shared";
 import { QueueItem } from "./queue";
 import { serverState } from "..";
 
-export const gatherLoop = (res: ActionResultData | null, context: GatherContext): QueueItem<GatherContext>[] => {
-  if (!res || !res.character.inventory) return [];
-
-  // todo,
-  // - there can be multiple squares with same resource
-  // - shouldn't have to call this every loop
-  const square = serverState.cache.squares.find((x) => x.content?.code === context.squareCode);
-  if (!square) {
-    return [];
+export const getGatherContext = (params: GatherParams): GatherContext => {
+  const gatherSquare = serverState.cache.squares.find((x) => x.content?.code === params.squareCode);
+  if (!gatherSquare) {
+    throw new Error("invalid param - square not found");
   }
-  const dest: Destination = { x: square.x, y: square.y };
+  return { gatherSquare };
+};
+
+export const gatherLoop = (res: ActionResultData | null, ctx: GatherContext): QueueItem<GatherContext>[] => {
+  if (!res || !res.character.inventory) return [];
 
   const totalQuantity = res.character.inventory.reduce((a, b) => a + b.quantity, 0);
 
@@ -29,10 +28,10 @@ export const gatherLoop = (res: ActionResultData | null, context: GatherContext)
     return [
       { action: move, payload: coords["Bank"] },
       ...depositAllPipeline,
-      { action: move, payload: dest, onExecuted: gatherLoop },
+      { action: move, payload: ctx.gatherSquare, onExecuted: gatherLoop },
     ];
-  } else if (res.character.x !== dest.x || res.character.y !== dest.y) {
-    return [{ action: move, payload: dest, onExecuted: gatherLoop }];
+  } else if (res.character.x !== ctx.gatherSquare.x || res.character.y !== ctx.gatherSquare.y) {
+    return [{ action: move, payload: ctx.gatherSquare, onExecuted: gatherLoop }];
   } else {
     return [{ action: gather, onExecuted: gatherLoop }];
   }

@@ -30,7 +30,7 @@ export const serverState = new ServerState();
 const fastify = Fastify();
 
 const main = async () => {
-  await migrate(db, { migrationsFolder: path.join(__dirname, "./migrations") });
+  await migrate(db, { migrationsFolder: path.join(__dirname, "./db/migrations") });
   await serverState.initialize();
   if (process.env.NODE_ENV === "development") {
     await fastify.register(fastifyCors);

@@ -1,6 +1,7 @@
 import { ActionResultData, CharacterInfo } from "@artifacts/shared";
 import { getCharacter } from "../api";
 import { delayMs, delayUntil, initialQueueFactory } from "./util";
+import { ActivityContext } from "@artifacts/shared";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface QueueItem<TContext = any, T = any> {
@@ -11,11 +12,13 @@ export interface QueueItem<TContext = any, T = any> {
 
 export class Queuey {
   private info: CharacterInfo;
+  private activityCtx: ActivityContext | null;
   private queue: QueueItem[];
   private aborted: boolean;
 
   constructor(ctx: CharacterInfo) {
     this.info = ctx;
+    this.activityCtx = null;
     this.queue = [];
     this.aborted = false;
   }
@@ -42,12 +45,15 @@ export class Queuey {
 
     try {
       this.concurrencyCheck();
+      [this.queue, this.activityCtx] = initialQueueFactory(initialCharacterState, this.info.activity);
+      if (!this.queue || !this.activityCtx) {
+        throw new Error("Failed to create initial queue");
+      }
     } catch (err) {
       this.handleError(err as Error);
       return;
     }
 
-    this.queue = initialQueueFactory(initialCharacterState, this.info.activity);
     await this.execute();
   }
 
@@ -66,8 +72,7 @@ export class Queuey {
 
       // TODO handle null result instead of passing null to onExecuted
 
-      // ew non-null assertion
-      const next = nextItem.onExecuted?.(result, this.info.activity!.context);
+      const next = nextItem.onExecuted?.(result, this.activityCtx);
       if (next) {
         this.concurrencyCheck();
         this.queue = this.queue.concat(next);

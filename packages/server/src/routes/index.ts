@@ -44,7 +44,7 @@ export const routes = (fastify: FastifyInstance) => {
     const storeData: typeof characterActivityTable.$inferInsert = {
       name: info.characterName,
       activityName: info.activity?.name || null,
-      activityContext: info.activity?.context ? JSON.stringify(info.activity.context) : null,
+      activityParams: info.activity?.params ? JSON.stringify(info.activity.params) : null,
     };
 
     await db.insert(characterActivityTable).values(storeData).onConflictDoUpdate({
