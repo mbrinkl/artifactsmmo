@@ -1,6 +1,6 @@
 import { Activity, ActivityName, CharacterInfo, Encyclopedia } from "@artifacts/shared";
 import { db } from "..";
-import { getCharacters, getItems, getMaps, getResources } from "../api";
+import { getCharacters, getItems, getMaps, getMonsters, getResources } from "../api";
 import { characterActivityTable } from "../db/schema";
 import { Queuey } from "./queue";
 import { CharacterContext } from "../types";
@@ -15,23 +15,26 @@ export class ServerState {
       squares: [],
       items: [],
       resources: [],
+      monsters: [],
     };
   }
 
   async initialize(): Promise<void> {
     console.log("fetching assets");
     const start = Date.now();
-    const [squares, items, resources, characters] = await Promise.all([
+    const [characters, squares, items, resources, monsters] = await Promise.all([
+      getCharacters(),
       getMaps(),
       getItems(),
       getResources(),
-      getCharacters(),
+      getMonsters(),
     ]);
     console.log("fetching assets in ms:", Date.now() - start);
 
     this.encyclopedia.squares = squares;
     this.encyclopedia.items = items;
     this.encyclopedia.resources = resources;
+    this.encyclopedia.monsters = monsters;
 
     const characterNames = characters.map((x) => x.name);
     const storedCharacterActivities = await db.select().from(characterActivityTable);

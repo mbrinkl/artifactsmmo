@@ -1,4 +1,4 @@
-import { Item, Resource, Square } from "@artifacts/shared";
+import { Item, Monster, Resource, Square } from "@artifacts/shared";
 import { client } from "..";
 
 export const getCharacters = async () => {
@@ -32,6 +32,7 @@ export const getItems = async (page: number = 1, accumulated: Item[] = []): Prom
   }
   return await getItems(page + 1, [...accumulated, ...result]);
 };
+
 export const getResources = async (page: number = 1, accumulated: Resource[] = []): Promise<Resource[]> => {
   const { data, error } = await client.GET("/resources", { params: { query: { page, size: 100 } } });
   const result = handle(data?.data, error);
@@ -39,6 +40,15 @@ export const getResources = async (page: number = 1, accumulated: Resource[] = [
     return [...accumulated, ...result];
   }
   return await getResources(page + 1, [...accumulated, ...result]);
+};
+
+export const getMonsters = async (page: number = 1, accumulated: Monster[] = []): Promise<Monster[]> => {
+  const { data, error } = await client.GET("/monsters", { params: { query: { page, size: 100 } } });
+  const result = handle(data?.data, error);
+  if (page === Number(data!.pages)) {
+    return [...accumulated, ...result];
+  }
+  return await getMonsters(page + 1, [...accumulated, ...result]);
 };
 
 interface Err {
