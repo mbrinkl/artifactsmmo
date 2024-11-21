@@ -1,14 +1,8 @@
-import { GatherLocation, gatherLocations } from "./locations";
-
-export const craftSourceItems = ["copper_ore"] as const;
-export const craftProductItems = ["copper"] as const;
-
 export interface GatherContext {
-  location: GatherLocation;
+  squareCode: string;
 }
 export interface CraftContext {
-  sourceItem: (typeof craftSourceItems)[number];
-  productItem: (typeof craftProductItems)[number];
+  productCode: string;
 }
 
 export type Activity = { name: "gather"; context: GatherContext } | { name: "craft"; context: CraftContext };
@@ -23,7 +17,7 @@ type ActivityMap = {
 };
 
 export const possibleContextsMap: ActivityMap = {
-  gather: { location: gatherLocations },
-  craft: { sourceItem: craftSourceItems, productItem: craftProductItems },
+  gather: { squareCode: "" },
+  craft: { productCode: "" },
 };
 export const possibileActivityNames = Object.keys(possibleContextsMap);

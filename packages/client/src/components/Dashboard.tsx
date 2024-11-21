@@ -1,6 +1,6 @@
 import { Loader, Stack, Text } from "@mantine/core";
 import { CharacterInfo } from "@artifacts/shared";
-import { useGetDashboardDataQuery, useUpdateActivityMutation } from "../api";
+import { useGetDashboardDataQuery, useGetInitialQuery, useUpdateActivityMutation } from "../api";
 import { DashboardCharacter } from "./DashboardCharacter";
 
 interface DashboardProps {
@@ -9,17 +9,22 @@ interface DashboardProps {
 
 export const Dashboard = (props: DashboardProps) => {
   const { data, error } = useGetDashboardDataQuery(props.token);
+  const initial = useGetInitialQuery(props.token);
   const mutation = useUpdateActivityMutation();
 
   const update = (characterInfo: CharacterInfo) => {
     mutation.mutate({ token: props.token, characterInfo });
   };
 
-  if (error) {
-    return <Text>Error: {error.message}</Text>;
+  if (error || initial.error) {
+    return (
+      <Text>
+        Error: {error?.message} {initial.error?.message}
+      </Text>
+    );
   }
 
-  if (!data) {
+  if (!data || !initial.data) {
     return <Loader />;
   }
 
@@ -30,7 +35,12 @@ export const Dashboard = (props: DashboardProps) => {
   return (
     <Stack>
       {data.map((character) => (
-        <DashboardCharacter key={character.characterName} character={character} update={update} />
+        <DashboardCharacter
+          key={character.characterName}
+          character={character}
+          initial={initial.data}
+          update={update}
+        />
       ))}
     </Stack>
   );

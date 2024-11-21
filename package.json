@@ -12,7 +12,7 @@
     "dev": "concurrently -c cyan,magenta npm:server npm:client",
     "prod": "cross-env NODE_ENV=production node --env-file=.env dist/index.js",
     "build": "npm run build --workspaces",
-    "postbuild": "rm -rf ./dist && cp -r packages/server/dist/ ./dist && cp -r packages/client/dist ./dist/static && cp -r packages/server/migrations ./dist/migrations",
+    "postbuild": "rm -rf ./dist && cp -r packages/server/dist/ ./dist && cp -r packages/client/dist ./dist/static && cp -r packages/server/src/migrations ./dist/migrations",
     "lint": "eslint .",
     "typecheck": "npm run typecheck --workspaces",
     "check": "npm run lint && npm run typecheck",

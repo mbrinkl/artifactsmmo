@@ -1,43 +1,63 @@
 import { useState } from "react";
-import { Activity, ActivityName, CharacterInfo, possibileActivityNames, possibleContextsMap } from "@artifacts/shared";
+import {
+  Activity,
+  ActivityName,
+  CharacterInfo,
+  Item,
+  possibileActivityNames,
+  Resource,
+  Square,
+} from "@artifacts/shared";
 import { Button, Paper, Select, Text } from "@mantine/core";
 import styles from "./DashboardChartacter.module.css";
 
 interface DashboardCharacterProps {
   character: CharacterInfo;
+  initial: { squares: Square[]; items: Item[]; resources: Resource[] };
   update: (info: CharacterInfo) => void;
 }
 
-export const DashboardCharacter = ({ character, update }: DashboardCharacterProps) => {
-  const [selectedActivity, setSelectedActivity] = useState<ActivityName | null>(null);
-  const [selectedContext, setSelectedContext] = useState<object | null>(null);
+const getit = (activityName: ActivityName, items: Item[], resources: Resource[]) => {
+  console.log("getting", resources.length);
+  switch (activityName) {
+    case "craft":
+      return items
+        .filter((x) => !!x.craft)
+        .map((x) => x.code)
+        .sort() as string[];
+    case "gather":
+      return resources.map((x) => x.code).sort();
+  }
+};
 
-  const onChangeActivity = (value: ActivityName | null) => {
-    setSelectedActivity(value);
+export const DashboardCharacter = ({ character, update, initial }: DashboardCharacterProps) => {
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
 
+  const onChangeActivityName = (value: ActivityName | null) => {
     if (value === null) {
-      setSelectedContext(null);
+      setSelectedActivity(null);
     } else {
-      let obj = {};
-      {
-        Object.entries(possibleContextsMap[value]).map(([key, value]) => {
-          obj = { ...obj, [key]: (value as string[])[0] };
-        });
+      if (value === "gather") {
+        setSelectedActivity({ name: value, context: { squareCode: "" } });
+      } else if (value === "craft") {
+        setSelectedActivity({ name: value, context: { productCode: "" } });
       }
-      setSelectedContext(obj);
     }
   };
 
   const onChangeContext = (property: string, value: string | null) => {
-    if (value === null) return;
-    setSelectedContext((prev) => ({ ...prev, [property]: value }));
+    setSelectedActivity((prev) => {
+      if (!prev) return null;
+      return { ...prev, context: { ...prev.context, [property]: value } } as Activity;
+    });
   };
 
   const updateActivity = () => {
-    if (!selectedActivity || !selectedContext) return;
+    if (!selectedActivity) return;
+    // todo, check context values are set
     update({
       characterName: character.characterName,
-      activity: { name: selectedActivity, context: selectedContext } as Activity,
+      activity: selectedActivity,
     });
   };
 
@@ -59,20 +79,19 @@ export const DashboardCharacter = ({ character, update }: DashboardCharacterProp
       <Select
         label="Activity"
         data={possibileActivityNames}
-        value={selectedActivity}
-        onChange={(v) => onChangeActivity(v as ActivityName)}
+        value={selectedActivity?.name}
+        onChange={(v) => onChangeActivityName(v as ActivityName)}
       />
-      {selectedActivity && selectedContext && (
+      {selectedActivity && (
         <div>
           <Text>Activity Context:</Text>
-          {Object.entries(possibleContextsMap[selectedActivity]).map(([key, value]) => {
+          {Object.entries(selectedActivity.context).map(([key, value]) => {
             return (
               <Select
                 key={key}
                 label={key}
-                data={value as string[]}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                value={(selectedContext as any)[key]}
+                data={getit(selectedActivity.name, initial.items, initial.resources)} // todo: usememo
+                value={value}
                 onChange={(v) => onChangeContext(key, v)}
               />
             );

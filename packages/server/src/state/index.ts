@@ -1,23 +1,41 @@
-import { Activity, ActivityName, CharacterInfo } from "@artifacts/shared";
+import { Activity, ActivityName, CharacterInfo, Item, Resource, Square } from "@artifacts/shared";
 import { db } from "..";
-import { getCharacters } from "../api";
+import { getCharacters, getItems, getMaps, getResources } from "../api";
 import { characterActivityTable } from "../db/schema";
 import { Queuey } from "./queue";
 import { CharacterContext } from "../types";
 
+interface DataCache {
+  squares: Square[];
+  items: Item[];
+  resources: Resource[];
+}
+
 export class ServerState {
   ctxMap: Record<string, CharacterContext>;
+  cache: DataCache;
 
   constructor() {
     this.ctxMap = {};
+    this.cache = {
+      squares: [],
+      items: [],
+      resources: [],
+    };
   }
 
   async initialize(): Promise<void> {
+    // todo parallelize
+    console.log("fetching assets");
+    const start = Date.now();
+    this.cache.squares = await getMaps();
+    this.cache.items = await getItems();
+    this.cache.resources = await getResources();
+    console.log("fetching assets in ms:", Date.now() - start);
+
     const characters = await getCharacters();
-    if (!characters) {
-      throw new Error("No characters found");
-    }
     const characterNames = characters.map((x) => x.name);
+
     const storedCharacterActivities = await db.select().from(characterActivityTable);
 
     characterNames.forEach((characterName) => {

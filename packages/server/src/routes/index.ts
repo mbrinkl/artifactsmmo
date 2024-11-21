@@ -23,6 +23,10 @@ export const routes = (fastify: FastifyInstance) => {
     done();
   });
 
+  fastify.get("/init", (req, res) => {
+    res.send(serverState.cache);
+  });
+
   fastify.get("/dashboard-data", (req, res) => {
     res.send(serverState.getInfo());
   });

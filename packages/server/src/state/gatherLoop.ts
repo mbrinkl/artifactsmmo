@@ -1,12 +1,21 @@
 import { deposit, gather, move } from "../api";
-import { coords, ActionResultData, GatherContext } from "@artifacts/shared";
+import { coords, ActionResultData, GatherContext, Destination } from "@artifacts/shared";
 import { QueueItem } from "./queue";
+import { serverState } from "..";
 
 export const gatherLoop = (res: ActionResultData | null, context: GatherContext): QueueItem<GatherContext>[] => {
   if (!res || !res.character.inventory) return [];
 
+  // todo,
+  // - there can be multiple squares with same resource
+  // - shouldn't have to call this every loop
+  const square = serverState.cache.squares.find((x) => x.content?.code === context.squareCode);
+  if (!square) {
+    return [];
+  }
+  const dest: Destination = { x: square.x, y: square.y };
+
   const totalQuantity = res.character.inventory.reduce((a, b) => a + b.quantity, 0);
-  const dest = coords[context.location];
 
   // if invy full, bank
   if (totalQuantity === res.character.inventory_max_items) {
