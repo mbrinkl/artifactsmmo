@@ -2,8 +2,25 @@ import { FastifyInstance } from "fastify";
 import { serverState, db } from "..";
 import { CharacterInfo } from "@artifacts/shared";
 import { characterActivityTable } from "../db/schema";
+import fastifyCors from "@fastify/cors";
+import fastifyStatic from "@fastify/static";
+import path from "path";
 
-export const routes = (fastify: FastifyInstance) => {
+export const initFastify = async (fastify: FastifyInstance) => {
+  if (process.env.NODE_ENV === "development") {
+    await fastify.register(fastifyCors);
+  } else {
+    await fastify.register(fastifyStatic, {
+      root: path.join(__dirname, "./static"),
+    });
+    fastify.get("/", (req, res) => {
+      res.sendFile("index.html");
+    });
+  }
+  await fastify.register(routes);
+};
+
+const routes = (fastify: FastifyInstance) => {
   fastify.addHook("onRequest", (req, res, done) => {
     const authHeader = req.headers["authorization"];
 
