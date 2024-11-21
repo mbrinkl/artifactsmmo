@@ -4,7 +4,7 @@ import { QueueItem } from "../state/queue";
 import { serverState } from "..";
 
 export const getCraftContext = (params: CraftParams): CraftContext => {
-  const productItem = serverState.cache.items.find((x) => x.code === params.productCode);
+  const productItem = serverState.encyclopedia.items.find((x) => x.code === params.productCode);
   if (!productItem) {
     throw new Error("Invalid product code.");
   }
@@ -12,7 +12,7 @@ export const getCraftContext = (params: CraftParams): CraftContext => {
   if (!sourceItems || sourceItems.length === 0) {
     throw new Error("Item is not craftable.");
   }
-  const craftSquare = serverState.cache.squares.find(
+  const craftSquare = serverState.encyclopedia.squares.find(
     (x) => x.content?.type === "workshop" && x.content.code === productItem.craft?.skill,
   );
   if (!craftSquare) {

@@ -4,7 +4,7 @@ import { QueueItem } from "./queue";
 import { serverState } from "..";
 
 export const getGatherContext = (params: GatherParams): GatherContext => {
-  const gatherSquare = serverState.cache.squares.find((x) => x.content?.code === params.squareCode);
+  const gatherSquare = serverState.encyclopedia.squares.find((x) => x.content?.code === params.squareCode);
   if (!gatherSquare) {
     throw new Error("invalid param - square not found");
   }

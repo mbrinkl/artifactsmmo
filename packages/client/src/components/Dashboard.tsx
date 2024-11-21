@@ -1,6 +1,6 @@
 import { Loader, Stack, Text } from "@mantine/core";
 import { CharacterInfo } from "@artifacts/shared";
-import { useGetDashboardDataQuery, useGetInitialQuery, useUpdateActivityMutation } from "../api";
+import { useGetDashboardDataQuery, useGetEncyclopdieaQuery, useUpdateActivityMutation } from "../api";
 import { DashboardCharacter } from "./DashboardCharacter";
 
 interface DashboardProps {
@@ -8,37 +8,37 @@ interface DashboardProps {
 }
 
 export const Dashboard = (props: DashboardProps) => {
-  const { data, error } = useGetDashboardDataQuery(props.token);
-  const initial = useGetInitialQuery(props.token);
-  const mutation = useUpdateActivityMutation();
+  const characterQuery = useGetDashboardDataQuery(props.token);
+  const encyclopediaQuery = useGetEncyclopdieaQuery(props.token);
+  const updateActivityMutation = useUpdateActivityMutation();
 
   const update = (characterInfo: CharacterInfo) => {
-    mutation.mutate({ token: props.token, characterInfo });
+    updateActivityMutation.mutate({ token: props.token, characterInfo });
   };
 
-  if (error || initial.error) {
+  if (characterQuery.error || encyclopediaQuery.error) {
     return (
       <Text>
-        Error: {error?.message} {initial.error?.message}
+        Error: {characterQuery.error?.message} {encyclopediaQuery.error?.message}
       </Text>
     );
   }
 
-  if (!data || !initial.data) {
+  if (!characterQuery.data || !encyclopediaQuery.data) {
     return <Loader />;
   }
 
-  if (data.length === 0) {
+  if (characterQuery.data.length === 0) {
     return <Text>No characters in response</Text>;
   }
 
   return (
     <Stack>
-      {data.map((character) => (
+      {characterQuery.data.map((character) => (
         <DashboardCharacter
           key={character.characterName}
           character={character}
-          initial={initial.data}
+          encyclopedia={encyclopediaQuery.data}
           update={update}
         />
       ))}

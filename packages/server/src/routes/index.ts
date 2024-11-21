@@ -24,7 +24,7 @@ export const routes = (fastify: FastifyInstance) => {
   });
 
   fastify.get("/init", (req, res) => {
-    res.send(serverState.cache);
+    res.send(serverState.encyclopedia);
   });
 
   fastify.get("/dashboard-data", (req, res) => {

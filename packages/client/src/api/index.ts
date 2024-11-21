@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CharacterInfo, Item, Resource, Square } from "@artifacts/shared";
+import { CharacterInfo, Encyclopedia } from "@artifacts/shared";
 import { serverUrl } from "../config";
 
-const getInitial = async (token: string): Promise<{ squares: Square[]; items: Item[]; resources: Resource[] }> => {
+const getEncyclopedia = async (token: string): Promise<Encyclopedia> => {
   const response = await fetch(serverUrl + "/init", {
     headers: { Authorization: "Bearer " + token },
   });
@@ -37,10 +37,10 @@ const updateActivity = async (token: string, characterInfo: CharacterInfo): Prom
   return await response.json();
 };
 
-export const useGetInitialQuery = (token: string) =>
+export const useGetEncyclopdieaQuery = (token: string) =>
   useQuery({
     queryKey: ["initial"],
-    queryFn: () => getInitial(token),
+    queryFn: () => getEncyclopedia(token),
   });
 
 export const useGetDashboardDataQuery = (token: string) =>

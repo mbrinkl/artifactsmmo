@@ -11,3 +11,9 @@ export type Resource = components["schemas"]["ResourceSchema"];
 export interface ActionResultData {
   character: Character;
 }
+
+export interface Encyclopedia {
+  squares: Square[];
+  items: Item[];
+  resources: Resource[];
+}

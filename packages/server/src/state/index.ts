@@ -1,23 +1,17 @@
-import { Activity, ActivityName, CharacterInfo, Item, Resource, Square } from "@artifacts/shared";
+import { Activity, ActivityName, CharacterInfo, Encyclopedia } from "@artifacts/shared";
 import { db } from "..";
 import { getCharacters, getItems, getMaps, getResources } from "../api";
 import { characterActivityTable } from "../db/schema";
 import { Queuey } from "./queue";
 import { CharacterContext } from "../types";
 
-interface DataCache {
-  squares: Square[];
-  items: Item[];
-  resources: Resource[];
-}
-
 export class ServerState {
   ctxMap: Record<string, CharacterContext>;
-  cache: DataCache;
+  encyclopedia: Encyclopedia;
 
   constructor() {
     this.ctxMap = {};
-    this.cache = {
+    this.encyclopedia = {
       squares: [],
       items: [],
       resources: [],
@@ -35,9 +29,9 @@ export class ServerState {
     ]);
     console.log("fetching assets in ms:", Date.now() - start);
 
-    this.cache.squares = squares;
-    this.cache.items = items;
-    this.cache.resources = resources;
+    this.encyclopedia.squares = squares;
+    this.encyclopedia.items = items;
+    this.encyclopedia.resources = resources;
 
     const characterNames = characters.map((x) => x.name);
     const storedCharacterActivities = await db.select().from(characterActivityTable);

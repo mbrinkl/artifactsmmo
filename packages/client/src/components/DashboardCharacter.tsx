@@ -1,23 +1,15 @@
 import { useState } from "react";
-import {
-  Activity,
-  ActivityName,
-  CharacterInfo,
-  Item,
-  possibileActivityNames,
-  Resource,
-  Square,
-} from "@artifacts/shared";
+import { Activity, ActivityName, CharacterInfo, Encyclopedia, possibileActivityNames } from "@artifacts/shared";
 import { Button, Paper, Select, Text } from "@mantine/core";
 import styles from "./DashboardChartacter.module.css";
 
 interface DashboardCharacterProps {
   character: CharacterInfo;
-  initial: { squares: Square[]; items: Item[]; resources: Resource[] };
+  encyclopedia: Encyclopedia;
   update: (info: CharacterInfo) => void;
 }
 
-const getit = (activityName: ActivityName, items: Item[], resources: Resource[]) => {
+const getParamsOptions = (activityName: ActivityName, { resources, items }: Encyclopedia) => {
   console.log("getting", resources.length);
   switch (activityName) {
     case "craft":
@@ -30,7 +22,7 @@ const getit = (activityName: ActivityName, items: Item[], resources: Resource[])
   }
 };
 
-export const DashboardCharacter = ({ character, update, initial }: DashboardCharacterProps) => {
+export const DashboardCharacter = ({ character, update, encyclopedia }: DashboardCharacterProps) => {
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
 
   const onChangeActivityName = (value: ActivityName | null) => {
@@ -90,7 +82,8 @@ export const DashboardCharacter = ({ character, update, initial }: DashboardChar
               <Select
                 key={key}
                 label={key}
-                data={getit(selectedActivity.name, initial.items, initial.resources)} // todo: usememo
+                // todo: usememo and get by param key in case of multi param
+                data={getParamsOptions(selectedActivity.name, encyclopedia)}
                 value={value}
                 onChange={(v) => onChangeContext(key, v)}
               />
