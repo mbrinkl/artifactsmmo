@@ -69,7 +69,7 @@ const handle = <TData extends ActionResultData>(
 ): TData | null => {
   if (error) {
     if (ignoreCodes && ignoreCodes.includes(error.error.code)) {
-      console.error("ignoring error", error.error);
+      // logger.warn("ignoring error", error.error);
       return null;
     }
     throw new Error(`${error.error.code} ${error.error.message}`);

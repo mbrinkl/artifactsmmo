@@ -1,12 +1,17 @@
-import { FastifyInstance } from "fastify";
-import { serverState, db } from "..";
-import { CharacterInfo } from "@artifacts/shared";
-import { characterActivityTable } from "../db/schema";
+import Fastify, { FastifyInstance } from "fastify";
+import { CharacterInfo, DEFAULT_PORT } from "@artifacts/shared";
 import fastifyCors from "@fastify/cors";
 import fastifyStatic from "@fastify/static";
 import path from "path";
+import { Logger } from "pino";
+import { ServerState } from "./serverState";
+import { DbAccessor } from "./dbAccessor";
 
-export const initFastify = async (fastify: FastifyInstance) => {
+export const initFastify = async (serverState: ServerState, dbAccessor: DbAccessor, logger: Logger) => {
+  const fastify = Fastify({
+    loggerInstance: logger.child({ name: "Fastify" }),
+  });
+
   if (process.env.NODE_ENV === "development") {
     await fastify.register(fastifyCors);
   } else {
@@ -17,24 +22,37 @@ export const initFastify = async (fastify: FastifyInstance) => {
       res.sendFile("index.html");
     });
   }
-  await fastify.register(routes);
+
+  await fastify.register(routes, { serverState, dbAccessor });
+
+  fastify.listen({ port: Number(process.env.port) || DEFAULT_PORT, host: "0.0.0.0" }, (err) => {
+    if (err) {
+      fastify.log.error(err);
+      process.exit(1);
+    }
+  });
 };
 
-const routes = (fastify: FastifyInstance) => {
+interface RouteOptions {
+  serverState: ServerState;
+  dbAccessor: DbAccessor;
+}
+
+const routes = (fastify: FastifyInstance, { serverState, dbAccessor }: RouteOptions) => {
   fastify.addHook("onRequest", (req, res, done) => {
     const authHeader = req.headers["authorization"];
 
     if (!authHeader) {
-      return res.status(400).send(new Error("No Auth Token"));
+      return res.status(401).send(new Error("No Auth Token"));
     }
 
     if (!authHeader.startsWith("Bearer ")) {
-      return res.status(400).send(new Error("Invalid Auth Token Format"));
+      return res.status(401).send(new Error("Invalid Auth Token Format"));
     }
 
     const token = authHeader.substring(7, authHeader.length);
     if (token !== process.env.auth_token) {
-      return res.status(400).send(new Error("Invalid Auth Token"));
+      return res.status(401).send(new Error("Invalid Auth Token"));
     }
 
     done();
@@ -57,17 +75,7 @@ const routes = (fastify: FastifyInstance) => {
     }
 
     serverState.update(info);
-
-    const storeData: typeof characterActivityTable.$inferInsert = {
-      name: info.characterName,
-      activityName: info.activity?.name || null,
-      activityParams: info.activity?.params ? JSON.stringify(info.activity.params) : null,
-    };
-
-    await db.insert(characterActivityTable).values(storeData).onConflictDoUpdate({
-      target: characterActivityTable.name,
-      set: storeData,
-    });
+    dbAccessor.upsertCharacter(info);
 
     res.send(serverState.getInfo());
   });

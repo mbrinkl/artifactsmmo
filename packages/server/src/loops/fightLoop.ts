@@ -1,15 +1,14 @@
-import { fight, move, rest } from "../../api";
-import { ActionResultData, FightContext, FightParams } from "@artifacts/shared";
-import { QueueItem } from "../queue";
-import { serverState } from "../..";
+import { fight, move, rest } from "../api";
+import { ActionResultData, Encyclopedia, FightContext, FightParams } from "@artifacts/shared";
+import { QueueItem } from "../services/queue";
 import { depositAll, getClosest, getInventoryNumItems } from "./loopUtil";
 
-export const getFightContext = (params: FightParams): FightContext => {
-  const monsterSquare = serverState.encyclopedia.squares.find((x) => x.content?.code === params.monsterCode);
+export const getFightContext = (encyclopedia: Encyclopedia, params: FightParams): FightContext => {
+  const monsterSquare = encyclopedia.squares.find((x) => x.content?.code === params.monsterCode);
   if (!monsterSquare) {
     throw new Error("Square not found: " + params.monsterCode);
   }
-  return { monsterSquare };
+  return { encyclopedia, monsterSquare };
 };
 
 export const fightLoop = ({ character }: ActionResultData, ctx: FightContext): QueueItem<FightContext>[] => {
@@ -17,7 +16,7 @@ export const fightLoop = ({ character }: ActionResultData, ctx: FightContext): Q
 
   if (inventoryNumItems === character.inventory_max_items) {
     return [
-      { action: move, payload: getClosest("bank", character) },
+      { action: move, payload: getClosest("bank", character, ctx.encyclopedia) },
       ...depositAll(character),
       { action: move, payload: ctx.monsterSquare, onExecuted: fightLoop },
     ];

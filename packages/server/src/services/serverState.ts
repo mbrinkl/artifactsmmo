@@ -1,15 +1,19 @@
 import { Activity, ActivityName, CharacterInfo, Encyclopedia } from "@artifacts/shared";
-import { db } from "..";
 import { getCharacters, getItems, getMaps, getMonsters, getResources } from "../api";
-import { characterActivityTable } from "../db/schema";
 import { Queuey } from "./queue";
 import { CharacterContext } from "../types";
+import { Logger } from "pino";
+import { DbAccessor } from "./dbAccessor";
 
 export class ServerState {
   ctxMap: Record<string, CharacterContext>;
   encyclopedia: Encyclopedia;
 
-  constructor() {
+  constructor(
+    private dbAccessor: DbAccessor,
+    private logger: Logger,
+  ) {
+    this.logger = logger.child({ name: ServerState.name });
     this.ctxMap = {};
     this.encyclopedia = {
       squares: [],
@@ -20,7 +24,7 @@ export class ServerState {
   }
 
   async initialize(): Promise<void> {
-    console.log("fetching assets");
+    this.logger.info("fetching assets");
     const start = Date.now();
     const [characters, squares, items, resources, monsters] = await Promise.all([
       getCharacters(),
@@ -29,7 +33,7 @@ export class ServerState {
       getResources(),
       getMonsters(),
     ]);
-    console.log("fetched assets in ms:", Date.now() - start);
+    this.logger.info(`fetched assets in ${Date.now() - start}ms`);
 
     this.encyclopedia.squares = squares;
     this.encyclopedia.items = items;
@@ -37,12 +41,12 @@ export class ServerState {
     this.encyclopedia.monsters = monsters;
 
     const characterNames = characters.map((x) => x.name);
-    const storedCharacterActivities = await db.select().from(characterActivityTable);
+    const storedCharacterActivities = await this.dbAccessor.getCharacters();
 
     characterNames.forEach((characterName) => {
       const stored = storedCharacterActivities.find((x) => x.name === characterName);
       if (stored && stored.activityName !== null && stored.activityParams !== null) {
-        console.log(characterName, "Restored Activity - ", stored.activityName, stored.activityParams);
+        this.logger.info(`${characterName} Restored Activity - ${stored.activityName}, ${stored.activityParams}`);
         const storedParams = stored.activityParams ? JSON.parse(stored.activityParams) : null;
         const storedActivity: Activity = { name: stored.activityName as ActivityName, params: storedParams };
         this.update({ characterName, activity: storedActivity });
@@ -52,20 +56,27 @@ export class ServerState {
     });
   }
 
-  update(info: CharacterInfo): void {
+  async update(info: CharacterInfo): Promise<void> {
     const existing = this.ctxMap[info.characterName];
     if (existing?.q) {
       existing.q.abort();
     }
 
     this.ctxMap[info.characterName] = info;
+
     if (this.ctxMap[info.characterName].activity === null) {
       return;
     }
 
-    const q = new Queuey(info);
+    const q = new Queuey(info, this, this.logger);
     q.initialize();
     this.ctxMap[info.characterName].q = q;
+  }
+
+  onQueueError(characterName: string): void {
+    this.ctxMap[characterName].activity = null;
+    this.ctxMap[characterName].q = undefined;
+    // update db to null activity?
   }
 
   getInfo(): CharacterInfo[] {

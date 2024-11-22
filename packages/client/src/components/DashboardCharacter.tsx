@@ -10,7 +10,6 @@ interface DashboardCharacterProps {
 }
 
 const getParamsOptions = (activityName: ActivityName, { resources, items, monsters }: Encyclopedia) => {
-  console.log("getting", resources.length);
   switch (activityName) {
     case "craft":
       return items

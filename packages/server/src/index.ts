@@ -1,19 +1,15 @@
-import Fastify from "fastify";
 import createClient from "openapi-fetch";
-import { DEFAULT_PORT, paths } from "@artifacts/shared";
-import { initFastify } from "./routes";
-import path from "path";
-import { drizzle } from "drizzle-orm/libsql";
-import { migrate } from "drizzle-orm/libsql/migrator";
-import * as dbSchema from "./db/schema";
-import { ServerState } from "./state";
+import { paths } from "@artifacts/shared";
+import { initFastify } from "./services/fastify";
+import { ServerState } from "./services/serverState";
+import { initializeLogger } from "./services/logger";
+import { initializeDb } from "./db";
+import { DbAccessor } from "./services/dbAccessor";
 
 const authToken = process.env.auth_token;
 if (!authToken) {
   throw new Error("Auth token not set in environment variables");
 }
-
-export const db = drizzle("file:local.db", { schema: dbSchema });
 
 export const client = createClient<paths>({
   baseUrl: "https://api.artifactsmmo.com",
@@ -24,19 +20,13 @@ export const client = createClient<paths>({
   },
 });
 
-export const serverState = new ServerState();
-const fastify = Fastify();
-
-const startServer = async () => {
-  await migrate(db, { migrationsFolder: path.join(__dirname, "./db/migrations") });
+const startup = async () => {
+  const logger = initializeLogger();
+  const db = await initializeDb();
+  const dbAccessor = new DbAccessor(db);
+  const serverState = new ServerState(dbAccessor, logger);
   await serverState.initialize();
-  await initFastify(fastify);
-  fastify.listen({ port: DEFAULT_PORT, host: "0.0.0.0" }, (err) => {
-    if (err) {
-      fastify.log.error(err);
-      process.exit(1);
-    }
-  });
+  await initFastify(serverState, dbAccessor, logger);
 };
 
-startServer();
+startup();

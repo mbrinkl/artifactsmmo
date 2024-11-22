@@ -1,10 +1,9 @@
-import { craft, deposit, move, withdraw } from "../../api";
-import { ActionResultData, coords, CraftContext, CraftParams } from "@artifacts/shared";
-import { QueueItem } from "../queue";
-import { serverState } from "../..";
+import { craft, deposit, move, withdraw } from "../api";
+import { ActionResultData, coords, CraftContext, CraftParams, Encyclopedia } from "@artifacts/shared";
+import { QueueItem } from "../services/queue";
 
-export const getCraftContext = (params: CraftParams): CraftContext => {
-  const productItem = serverState.encyclopedia.items.find((x) => x.code === params.productCode);
+export const getCraftContext = (encyclopedia: Encyclopedia, params: CraftParams): CraftContext => {
+  const productItem = encyclopedia.items.find((x) => x.code === params.productCode);
   if (!productItem) {
     throw new Error("Invalid product code.");
   }
@@ -12,7 +11,7 @@ export const getCraftContext = (params: CraftParams): CraftContext => {
   if (!sourceItems || sourceItems.length === 0) {
     throw new Error("Item is not craftable.");
   }
-  const craftSquare = serverState.encyclopedia.squares.find(
+  const craftSquare = encyclopedia.squares.find(
     (x) => x.content?.type === "workshop" && x.content.code === productItem.craft?.skill,
   );
   if (!craftSquare) {
@@ -20,6 +19,7 @@ export const getCraftContext = (params: CraftParams): CraftContext => {
   }
 
   return {
+    encyclopedia,
     productItem,
     sourceItems,
     craftSquare,

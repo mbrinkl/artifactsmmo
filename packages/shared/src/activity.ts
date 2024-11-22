@@ -1,6 +1,10 @@
-import { Destination, Drop, Item } from "./derived";
+import { Destination, Drop, Encyclopedia, Item } from "./derived";
 
-export interface GatherContext {
+export interface BaseContext {
+  encyclopedia: Encyclopedia;
+}
+
+export interface GatherContext extends BaseContext {
   gatherSquare: Destination;
 }
 export interface GatherParams {
@@ -11,11 +15,11 @@ export interface FightParams {
   monsterCode: string;
 }
 
-export interface FightContext {
+export interface FightContext extends BaseContext {
   monsterSquare: Destination;
 }
 
-export interface CraftContext {
+export interface CraftContext extends BaseContext {
   productItem: Item;
   sourceItems: Drop[];
   craftSquare: Destination;
