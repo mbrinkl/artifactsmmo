@@ -17,6 +17,13 @@ export const fight = async (name: string) => {
   return handle(data?.data, error);
 };
 
+export const rest = async (name: string) => {
+  const { data, error } = await client.POST("/my/{name}/action/rest", {
+    params: { path: { name } },
+  });
+  return handle(data?.data, error);
+};
+
 export const gather = async (name: string) => {
   const { data, error } = await client.POST("/my/{name}/action/gathering", {
     params: { path: { name } },

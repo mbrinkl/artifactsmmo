@@ -9,7 +9,7 @@ interface DashboardCharacterProps {
   update: (info: CharacterInfo) => void;
 }
 
-const getParamsOptions = (activityName: ActivityName, { resources, items }: Encyclopedia) => {
+const getParamsOptions = (activityName: ActivityName, { resources, items, monsters }: Encyclopedia) => {
   console.log("getting", resources.length);
   switch (activityName) {
     case "craft":
@@ -19,6 +19,8 @@ const getParamsOptions = (activityName: ActivityName, { resources, items }: Ency
         .sort() as string[];
     case "gather":
       return resources.map((x) => x.code).sort();
+    case "fight":
+      return monsters.map((x) => x.code).sort();
   }
 };
 
@@ -33,6 +35,8 @@ export const DashboardCharacter = ({ character, update, encyclopedia }: Dashboar
         setSelectedActivity({ name: value, params: { squareCode: "" } });
       } else if (value === "craft") {
         setSelectedActivity({ name: value, params: { productCode: "" } });
+      } else if (value === "fight") {
+        setSelectedActivity({ name: value, params: { monsterCode: "" } });
       }
     }
   };

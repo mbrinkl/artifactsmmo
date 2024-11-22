@@ -2,6 +2,7 @@ import { Activity, ActivityContext, Character } from "@artifacts/shared";
 import { craftLoop, getCraftContext } from "./loops/craftLoop";
 import { gatherLoop, getGatherContext } from "./loops/gatherLoop";
 import { QueueItem } from "./queue";
+import { fightLoop, getFightContext } from "./loops/fightLoop";
 
 export const delayMs = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -30,6 +31,9 @@ export const initialQueueFactory = (character: Character, activity: Activity): [
       return [gatherLoop(res, ctx), ctx];
     case "craft":
       ctx = getCraftContext(params);
-      return [craftLoop(res, getCraftContext(params)), ctx];
+      return [craftLoop(res, ctx), ctx];
+    case "fight":
+      ctx = getFightContext(params);
+      return [fightLoop(res, ctx), ctx];
   }
 };
