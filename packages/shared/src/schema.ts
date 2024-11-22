@@ -2162,7 +2162,7 @@ export interface components {
        * Inventory
        * @description List of inventory slots.
        */
-      inventory?: components["schemas"]["InventorySlot"][];
+      inventory: components["schemas"]["InventorySlot"][];
     };
     /**
      * CharacterSkin

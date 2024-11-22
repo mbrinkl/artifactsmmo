@@ -1,6 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CharacterInfo } from "@artifacts/shared";
+import { CharacterInfo, Encyclopedia } from "@artifacts/shared";
 import { serverUrl } from "../config";
+
+const getEncyclopedia = async (token: string): Promise<Encyclopedia> => {
+  const response = await fetch(serverUrl + "/init", {
+    headers: { Authorization: "Bearer " + token },
+  });
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(err);
+  }
+  return await response.json();
+};
 
 const getDashboardData = async (token: string): Promise<CharacterInfo[]> => {
   const response = await fetch(serverUrl + "/dashboard-data", {
@@ -25,6 +36,12 @@ const updateActivity = async (token: string, characterInfo: CharacterInfo): Prom
   }
   return await response.json();
 };
+
+export const useGetEncyclopdieaQuery = (token: string) =>
+  useQuery({
+    queryKey: ["initial"],
+    queryFn: () => getEncyclopedia(token),
+  });
 
 export const useGetDashboardDataQuery = (token: string) =>
   useQuery({

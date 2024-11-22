@@ -17,9 +17,11 @@
   },
   "scripts": {
     "build": "vite build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "openapi-gen": "openapi-typescript https://api.artifactsmmo.com/openapi.json -o ./src/schema.ts"
   },
   "devDependencies": {
+    "openapi-typescript": "^7.4.3",
     "vite": "^5.4.11",
     "vite-plugin-dts": "^4.3.0"
   }

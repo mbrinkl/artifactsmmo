@@ -1,29 +1,51 @@
-import { GatherLocation, gatherLocations } from "./locations";
+import { Destination, Drop, Encyclopedia, Item } from "./derived";
 
-export const craftSourceItems = ["copper_ore"] as const;
-export const craftProductItems = ["copper"] as const;
-
-export interface GatherContext {
-  location: GatherLocation;
-}
-export interface CraftContext {
-  sourceItem: (typeof craftSourceItems)[number];
-  productItem: (typeof craftProductItems)[number];
+export interface BaseContext {
+  encyclopedia: Encyclopedia;
 }
 
-export type Activity = { name: "gather"; context: GatherContext } | { name: "craft"; context: CraftContext };
+export interface GatherContext extends BaseContext {
+  gatherSquare: Destination;
+}
+export interface GatherParams {
+  squareCode: string;
+}
+
+export interface FightParams {
+  monsterCode: string;
+}
+
+export interface FightContext extends BaseContext {
+  monsterSquare: Destination;
+}
+
+export interface CraftContext extends BaseContext {
+  productItem: Item;
+  sourceItems: Drop[];
+  craftSquare: Destination;
+}
+export interface CraftParams {
+  productCode: string;
+}
+
+export type Activity =
+  | { name: "gather"; params: GatherParams }
+  | { name: "craft"; params: CraftParams }
+  | { name: "fight"; params: FightParams };
 export type ActivityName = Activity["name"];
-export type ActivityContext = Activity["context"];
+export type ActivityParams = Activity["params"];
+export type ActivityContext = GatherContext | CraftContext | FightContext;
 
 type ExtractPropertyNames<T> = {
   [Key in keyof T]: unknown;
 };
 type ActivityMap = {
-  [K in Activity as K["name"]]: ExtractPropertyNames<K["context"]>;
+  [K in Activity as K["name"]]: ExtractPropertyNames<K["params"]>;
 };
 
 export const possibleContextsMap: ActivityMap = {
-  gather: { location: gatherLocations },
-  craft: { sourceItem: craftSourceItems, productItem: craftProductItems },
+  gather: { squareCode: "" },
+  craft: { productCode: "" },
+  fight: { monsterCode: "" },
 };
 export const possibileActivityNames = Object.keys(possibleContextsMap);

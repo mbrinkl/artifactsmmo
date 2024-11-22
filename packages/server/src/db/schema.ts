@@ -4,5 +4,5 @@ export const characterActivityTable = sqliteTable("character_activity", {
   id: int().primaryKey({ autoIncrement: true }),
   name: text().notNull().unique(),
   activityName: text(),
-  activityContext: text(),
+  activityParams: text(),
 });
