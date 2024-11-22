@@ -11,21 +11,21 @@ export const getFightContext = (encyclopedia: Encyclopedia, params: FightParams)
   return { encyclopedia, monsterSquare };
 };
 
-export const fightLoop = ({ character }: ActionResultData, ctx: FightContext): QueueItem<FightContext>[] => {
+export const fightQueueBuilder = ({ character }: ActionResultData, ctx: FightContext): QueueItem<FightContext>[] => {
   const inventoryNumItems = getInventoryNumItems(character);
 
   if (inventoryNumItems === character.inventory_max_items) {
     return [
       { action: move, payload: getClosest("bank", character, ctx.encyclopedia) },
       ...depositAll(character),
-      { action: move, payload: ctx.monsterSquare, onExecuted: fightLoop },
+      { action: move, payload: ctx.monsterSquare, onExecuted: fightQueueBuilder },
     ];
   } else if (character.x !== ctx.monsterSquare.x || character.y !== ctx.monsterSquare.y) {
-    return [{ action: move, payload: ctx.monsterSquare, onExecuted: fightLoop }];
+    return [{ action: move, payload: ctx.monsterSquare, onExecuted: fightQueueBuilder }];
   } else if (character.hp < character.max_hp) {
     // TODO: better calculation for resting
-    return [{ action: rest, onExecuted: fightLoop }];
+    return [{ action: rest, onExecuted: fightQueueBuilder }];
   } else {
-    return [{ action: fight, onExecuted: fightLoop }];
+    return [{ action: fight, onExecuted: fightQueueBuilder }];
   }
 };

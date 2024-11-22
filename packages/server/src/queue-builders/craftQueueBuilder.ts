@@ -26,7 +26,7 @@ export const getCraftContext = (encyclopedia: Encyclopedia, params: CraftParams)
   };
 };
 
-export const craftLoop = (res: ActionResultData | null, ctx: CraftContext): QueueItem<CraftContext>[] => {
+export const craftQueueBuilder = (res: ActionResultData | null, ctx: CraftContext): QueueItem<CraftContext>[] => {
   if (!res || !res.character.inventory) return [];
 
   const max = res.character.inventory_max_items;
@@ -50,15 +50,17 @@ export const craftLoop = (res: ActionResultData | null, ctx: CraftContext): Queu
       ...depositNonSourceItems,
 
       // TODO: only withdraws the amount of space before deposit
-      { action: withdraw, payload: { code: ctx.sourceItems[0].code, quantity: space }, onExecuted: craftLoop },
+      { action: withdraw, payload: { code: ctx.sourceItems[0].code, quantity: space }, onExecuted: craftQueueBuilder },
     ];
   }
 
   if (res.character.x !== ctx.craftSquare.x || res.character.y !== ctx.craftSquare.y) {
-    return [{ action: move, payload: ctx.craftSquare, onExecuted: craftLoop }];
+    return [{ action: move, payload: ctx.craftSquare, onExecuted: craftQueueBuilder }];
   }
 
   const craftQuantity = Math.floor(sourceItemInInv.quantity / ctx.sourceItems[0].quantity);
 
-  return [{ action: craft, payload: { code: ctx.productItem.code, quantity: craftQuantity }, onExecuted: craftLoop }];
+  return [
+    { action: craft, payload: { code: ctx.productItem.code, quantity: craftQuantity }, onExecuted: craftQueueBuilder },
+  ];
 };

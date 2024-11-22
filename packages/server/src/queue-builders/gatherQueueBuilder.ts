@@ -13,18 +13,18 @@ export const getGatherContext = (encyclopedia: Encyclopedia, params: GatherParam
   return { encyclopedia, gatherSquare };
 };
 
-export const gatherLoop = ({ character }: ActionResultData, ctx: GatherContext): QueueItem<GatherContext>[] => {
+export const gatherQueueBuilder = ({ character }: ActionResultData, ctx: GatherContext): QueueItem<GatherContext>[] => {
   const inventoryNumItems = getInventoryNumItems(character);
 
   if (inventoryNumItems === character.inventory_max_items) {
     return [
       { action: move, payload: getClosest("bank", character, ctx.encyclopedia) },
       ...depositAll(character),
-      { action: move, payload: ctx.gatherSquare, onExecuted: gatherLoop },
+      { action: move, payload: ctx.gatherSquare, onExecuted: gatherQueueBuilder },
     ];
   } else if (character.x !== ctx.gatherSquare.x || character.y !== ctx.gatherSquare.y) {
-    return [{ action: move, payload: ctx.gatherSquare, onExecuted: gatherLoop }];
+    return [{ action: move, payload: ctx.gatherSquare, onExecuted: gatherQueueBuilder }];
   } else {
-    return [{ action: gather, onExecuted: gatherLoop }];
+    return [{ action: gather, onExecuted: gatherQueueBuilder }];
   }
 };
