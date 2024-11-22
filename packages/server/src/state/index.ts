@@ -29,7 +29,7 @@ export class ServerState {
       getResources(),
       getMonsters(),
     ]);
-    console.log("fetching assets in ms:", Date.now() - start);
+    console.log("fetched assets in ms:", Date.now() - start);
 
     this.encyclopedia.squares = squares;
     this.encyclopedia.items = items;

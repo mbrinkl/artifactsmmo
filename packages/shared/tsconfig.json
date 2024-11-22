@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "ESNext",
     "target": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "Bundler",
     "sourceMap": true,
     "strict": true,
     "declaration": true,
@@ -10,7 +10,7 @@
     "noEmitOnError": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "noEmit": false
+    "noUncheckedIndexedAccess": true
   },
   "include": ["src"],
   "exclude": ["dist"]

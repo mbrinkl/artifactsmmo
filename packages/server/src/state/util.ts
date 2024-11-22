@@ -1,6 +1,6 @@
 import { Activity, ActivityContext, Character } from "@artifacts/shared";
-import { craftLoop, getCraftContext } from "./craftLoop";
-import { gatherLoop, getGatherContext } from "./gatherLoop";
+import { craftLoop, getCraftContext } from "./loops/craftLoop";
+import { gatherLoop, getGatherContext } from "./loops/gatherLoop";
 import { QueueItem } from "./queue";
 
 export const delayMs = (ms: number): Promise<void> => {

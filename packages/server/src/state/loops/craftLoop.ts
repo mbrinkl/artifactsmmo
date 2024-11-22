@@ -1,7 +1,7 @@
-import { craft, deposit, move, withdraw } from "../api";
+import { craft, deposit, move, withdraw } from "../../api";
 import { ActionResultData, coords, CraftContext, CraftParams } from "@artifacts/shared";
-import { QueueItem } from "../state/queue";
-import { serverState } from "..";
+import { QueueItem } from "../queue";
+import { serverState } from "../..";
 
 export const getCraftContext = (params: CraftParams): CraftContext => {
   const productItem = serverState.encyclopedia.items.find((x) => x.code === params.productCode);
@@ -16,7 +16,7 @@ export const getCraftContext = (params: CraftParams): CraftContext => {
     (x) => x.content?.type === "workshop" && x.content.code === productItem.craft?.skill,
   );
   if (!craftSquare) {
-    throw new Error("Craft square not found");
+    throw new Error("Craft square not found.");
   }
 
   return {

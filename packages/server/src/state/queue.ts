@@ -1,13 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ActionResultData, CharacterInfo } from "@artifacts/shared";
 import { getCharacter } from "../api";
 import { delayMs, delayUntil, initialQueueFactory } from "./util";
 import { ActivityContext } from "@artifacts/shared";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface QueueItem<TContext = any, T = any> {
-  action: (name: string, payload?: T) => Promise<ActionResultData | null>;
-  payload?: T;
-  onExecuted?: (result: ActionResultData | null, context: TContext) => QueueItem<TContext>[];
+type ActionFn = (name: string, payload?: any) => Promise<ActionResultData | null>;
+
+export interface QueueItem<TContext = any, T extends ActionFn = any> {
+  action: T;
+  payload?: any;
+  onExecuted?: (res: ReturnType<T>, context: TContext) => QueueItem<TContext>[];
 }
 
 export class Queuey {
