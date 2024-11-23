@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "00256ab4-c5e3-4e01-a09d-2c07988361bf",
+  "id": "c53ec75a-fad1-4a34-9234-a50d3a93f629",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "character_activity": {
@@ -28,8 +28,8 @@
           "notNull": false,
           "autoincrement": false
         },
-        "activityContext": {
-          "name": "activityContext",
+        "activityParams": {
+          "name": "activityParams",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

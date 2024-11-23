@@ -4,14 +4,13 @@
   "scripts": {
     "db:generate": "drizzle-kit generate",
     "dev": "cross-env NODE_ENV=development tsx watch --clear-screen=false --env-file=../../.env src/index.ts",
-    "build": "npm run db:generate && esbuild src/index.ts --bundle --outdir=dist --platform=node",
+    "build": "echo idiot",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@artifacts/shared": "file:../shared",
     "@fastify/cors": "^10.0.1",
-    "@fastify/static": "^8.0.2",
     "@libsql/client": "^0.14.0",
     "drizzle-orm": "^0.36.3",
     "fastify": "^5.1.0",
