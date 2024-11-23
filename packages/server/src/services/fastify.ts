@@ -1,8 +1,5 @@
 import Fastify, { FastifyInstance } from "fastify";
 import { CharacterInfo, DEFAULT_PORT } from "@artifacts/shared";
-import fastifyCors from "@fastify/cors";
-import fastifyStatic from "@fastify/static";
-import path from "path";
 import { Logger } from "pino";
 import { ServerState } from "./serverState";
 import { DbAccessor } from "./dbAccessor";
@@ -13,14 +10,8 @@ export const initFastify = async (serverState: ServerState, dbAccessor: DbAccess
   });
 
   if (process.env.NODE_ENV === "development") {
-    await fastify.register(fastifyCors);
-  } else {
-    await fastify.register(fastifyStatic, {
-      root: path.join(__dirname, "./static"),
-    });
-    fastify.get("/", (req, res) => {
-      res.sendFile("index.html");
-    });
+    const cors = await import("@fastify/cors");
+    await fastify.register(cors);
   }
 
   await fastify.register(routes, { serverState, dbAccessor });
