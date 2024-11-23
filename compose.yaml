@@ -4,12 +4,14 @@ services:
       context: .
     environment:
       NODE_ENV: production
+      db_path: /data
       auth_token: ${auth_token}
       loki_host: ${loki_host}
       loki_user: ${loki_user}
       loki_token: ${loki_token}
     volumes:
       - static:/srv
+      - db_data:/data
     ports:
       - 3000:3000
 
@@ -29,6 +31,7 @@ services:
 
 volumes:
   static:
+  db_data:
   caddy_data:
   caddy_config:
 # The commented out section below is an example of how to define a PostgreSQL
