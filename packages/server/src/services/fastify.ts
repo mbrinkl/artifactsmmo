@@ -58,15 +58,15 @@ const routes = (fastify: FastifyInstance, { serverState, dbAccessor }: RouteOpti
     done();
   });
 
-  fastify.get("/init", (req, res) => {
+  fastify.get("/api/init", (req, res) => {
     res.send(serverState.encyclopedia);
   });
 
-  fastify.get("/dashboard-data", (req, res) => {
+  fastify.get("/api/dashboard-data", (req, res) => {
     res.send(serverState.getInfo());
   });
 
-  fastify.post("/update-activity", async (req, res) => {
+  fastify.post("/api/update-activity", async (req, res) => {
     const info = JSON.parse(req.body as string) as CharacterInfo;
 
     const existingContext = serverState.ctxMap[info.characterName];

@@ -3,7 +3,7 @@ import { CharacterInfo, Encyclopedia } from "@artifacts/shared";
 import { serverUrl } from "../config";
 
 const getEncyclopedia = async (token: string): Promise<Encyclopedia> => {
-  const response = await fetch(serverUrl + "/init", {
+  const response = await fetch(serverUrl + "/api/init", {
     headers: { Authorization: "Bearer " + token },
   });
   if (!response.ok) {
@@ -14,7 +14,7 @@ const getEncyclopedia = async (token: string): Promise<Encyclopedia> => {
 };
 
 const getDashboardData = async (token: string): Promise<CharacterInfo[]> => {
-  const response = await fetch(serverUrl + "/dashboard-data", {
+  const response = await fetch(serverUrl + "/api/dashboard-data", {
     headers: { Authorization: "Bearer " + token },
   });
   if (!response.ok) {
@@ -25,7 +25,7 @@ const getDashboardData = async (token: string): Promise<CharacterInfo[]> => {
 };
 
 const updateActivity = async (token: string, characterInfo: CharacterInfo): Promise<CharacterInfo[]> => {
-  const response = await fetch(serverUrl + "/update-activity", {
+  const response = await fetch(serverUrl + "/api/update-activity", {
     method: "POST",
     body: JSON.stringify(characterInfo),
     headers: { Authorization: "Bearer " + token },
