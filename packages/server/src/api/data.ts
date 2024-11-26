@@ -1,5 +1,5 @@
 import { Item, Monster, Resource, Square } from "@artifacts/shared";
-import { client } from "..";
+import { client } from "./client";
 
 export const getCharacters = async () => {
   const { data, error } = await client.GET("/my/characters");

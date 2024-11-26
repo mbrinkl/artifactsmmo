@@ -4,7 +4,7 @@ import { ActionResultData, CharacterInfo } from "@artifacts/shared";
 import { getCharacter } from "../api";
 import { delayMs, delayUntil, initialQueueFactory } from "./util";
 import { ActivityContext } from "@artifacts/shared";
-import { ServerState } from "./serverState";
+import { AppService } from "src/app.service";
 
 type ActionFn = (name: string, payload?: any) => Promise<ActionResultData | null>;
 
@@ -23,7 +23,7 @@ export class Queuey {
 
   constructor(
     ctx: CharacterInfo,
-    private serverState: ServerState,
+    private serverState: AppService,
     logger: Logger,
   ) {
     this.info = ctx;

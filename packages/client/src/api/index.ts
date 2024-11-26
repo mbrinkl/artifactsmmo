@@ -3,8 +3,8 @@ import { CharacterInfo, Encyclopedia } from "@artifacts/shared";
 import { serverUrl } from "../config";
 
 const getEncyclopedia = async (token: string): Promise<Encyclopedia> => {
-  const response = await fetch(serverUrl + "/api/init", {
-    headers: { Authorization: "Bearer " + token },
+  const response = await fetch(serverUrl + "/api/encyclopedia", {
+    headers: { Authorization: "Bearer " + token, Accept: "application/json" },
   });
   if (!response.ok) {
     const err = await response.text();
@@ -14,8 +14,8 @@ const getEncyclopedia = async (token: string): Promise<Encyclopedia> => {
 };
 
 const getDashboardData = async (token: string): Promise<CharacterInfo[]> => {
-  const response = await fetch(serverUrl + "/api/dashboard-data", {
-    headers: { Authorization: "Bearer " + token },
+  const response = await fetch(serverUrl + "/api/characters", {
+    headers: { Authorization: "Bearer " + token, Accept: "application/json" },
   });
   if (!response.ok) {
     const err = await response.text();
@@ -25,10 +25,10 @@ const getDashboardData = async (token: string): Promise<CharacterInfo[]> => {
 };
 
 const updateActivity = async (token: string, characterInfo: CharacterInfo): Promise<CharacterInfo[]> => {
-  const response = await fetch(serverUrl + "/api/update-activity", {
+  const response = await fetch(serverUrl + "/api/update", {
     method: "POST",
     body: JSON.stringify(characterInfo),
-    headers: { Authorization: "Bearer " + token },
+    headers: { Authorization: "Bearer " + token, Accept: "application/json", "Content-Type": "application/json" },
   });
   if (!response.ok) {
     const err = await response.text();

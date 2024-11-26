@@ -1,4 +1,4 @@
-import { client } from "..";
+import { client } from "./client";
 import { ActionResultData, Destination, Drop } from "@artifacts/shared";
 
 export const move = async (name: string, destintation: Destination) => {
