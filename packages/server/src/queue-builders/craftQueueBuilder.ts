@@ -1,4 +1,3 @@
-import { craft, deposit, move, withdraw } from "../api";
 import { ActionResultData, coords, CraftContext, CraftParams, Encyclopedia } from "@artifacts/shared";
 import { QueueItem } from "../services/queue";
 
@@ -41,26 +40,31 @@ export const craftQueueBuilder = (res: ActionResultData | null, ctx: CraftContex
     const depositNonSourceItems: QueueItem[] = res.character.inventory
       .filter((x) => x.quantity > 0 && x.code !== ctx.sourceItems[0].code)
       .map(({ code, quantity }) => ({
-        action: deposit,
-        payload: { code, quantity },
+        action: { type: "deposit", payload: { code, quantity } },
       }));
 
     return [
-      { action: move, payload: coords["Bank"] } satisfies QueueItem<typeof move>,
+      { action: { type: "move", payload: coords["Bank"] } },
       ...depositNonSourceItems,
 
       // TODO: only withdraws the amount of space before deposit
-      { action: withdraw, payload: { code: ctx.sourceItems[0].code, quantity: space }, onExecuted: craftQueueBuilder },
+      {
+        action: { type: "withdraw", payload: { code: ctx.sourceItems[0].code, quantity: space } },
+        onExecuted: craftQueueBuilder,
+      },
     ];
   }
 
   if (res.character.x !== ctx.craftSquare.x || res.character.y !== ctx.craftSquare.y) {
-    return [{ action: move, payload: ctx.craftSquare, onExecuted: craftQueueBuilder }];
+    return [{ action: { type: "move", payload: ctx.craftSquare }, onExecuted: craftQueueBuilder }];
   }
 
   const craftQuantity = Math.floor(sourceItemInInv.quantity / ctx.sourceItems[0].quantity);
 
   return [
-    { action: craft, payload: { code: ctx.productItem.code, quantity: craftQuantity }, onExecuted: craftQueueBuilder },
+    {
+      action: { type: "craft", payload: { code: ctx.productItem.code, quantity: craftQuantity } },
+      onExecuted: craftQueueBuilder,
+    },
   ];
 };

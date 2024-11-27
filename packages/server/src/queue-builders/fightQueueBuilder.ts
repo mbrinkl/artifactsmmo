@@ -1,4 +1,3 @@
-import { fight, move, rest } from "../api";
 import { ActionResultData, Encyclopedia, FightContext, FightParams } from "@artifacts/shared";
 import { QueueItem } from "../services/queue";
 import { depositAll, getClosest, getInventoryNumItems } from "./loopUtil";
@@ -16,16 +15,16 @@ export const fightQueueBuilder = ({ character }: ActionResultData, ctx: FightCon
 
   if (inventoryNumItems === character.inventory_max_items) {
     return [
-      { action: move, payload: getClosest("bank", character, ctx.encyclopedia) },
+      { action: { type: "move", payload: getClosest("bank", character, ctx.encyclopedia) } },
       ...depositAll(character),
-      { action: move, payload: ctx.monsterSquare, onExecuted: fightQueueBuilder },
+      { action: { type: "move", payload: ctx.monsterSquare }, onExecuted: fightQueueBuilder },
     ];
   } else if (character.x !== ctx.monsterSquare.x || character.y !== ctx.monsterSquare.y) {
-    return [{ action: move, payload: ctx.monsterSquare, onExecuted: fightQueueBuilder }];
+    return [{ action: { type: "move", payload: ctx.monsterSquare }, onExecuted: fightQueueBuilder }];
   } else if (character.hp < character.max_hp) {
     // TODO: better calculation for resting
-    return [{ action: rest, onExecuted: fightQueueBuilder }];
+    return [{ action: { type: "rest" }, onExecuted: fightQueueBuilder }];
   } else {
-    return [{ action: fight, onExecuted: fightQueueBuilder }];
+    return [{ action: { type: "fight" }, onExecuted: fightQueueBuilder }];
   }
 };

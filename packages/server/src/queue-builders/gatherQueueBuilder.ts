@@ -1,4 +1,3 @@
-import { gather, move } from "../api";
 import { ActionResultData, Encyclopedia, GatherContext, GatherParams } from "@artifacts/shared";
 import { QueueItem } from "../services/queue";
 import { depositAll, getClosest, getInventoryNumItems } from "./loopUtil";
@@ -18,13 +17,13 @@ export const gatherQueueBuilder = ({ character }: ActionResultData, ctx: GatherC
 
   if (inventoryNumItems === character.inventory_max_items) {
     return [
-      { action: move, payload: getClosest("bank", character, ctx.encyclopedia) },
+      { action: { type: "move", payload: getClosest("bank", character, ctx.encyclopedia) } },
       ...depositAll(character),
-      { action: move, payload: ctx.gatherSquare, onExecuted: gatherQueueBuilder },
+      { action: { type: "move", payload: ctx.gatherSquare }, onExecuted: gatherQueueBuilder },
     ];
   } else if (character.x !== ctx.gatherSquare.x || character.y !== ctx.gatherSquare.y) {
-    return [{ action: move, payload: ctx.gatherSquare, onExecuted: gatherQueueBuilder }];
+    return [{ action: { type: "move", payload: ctx.gatherSquare }, onExecuted: gatherQueueBuilder }];
   } else {
-    return [{ action: gather, onExecuted: gatherQueueBuilder }];
+    return [{ action: { type: "gather" }, onExecuted: gatherQueueBuilder }];
   }
 };

@@ -13,7 +13,7 @@ export class AppController {
 
   @Get("characters")
   getCharacters(): CharacterInfo[] {
-    return this.appService.getInfo();
+    return this.appService.getInfo(); //
   }
 
   @Post("update")
@@ -21,7 +21,6 @@ export class AppController {
     if (!this.appService.ctxMap[info.characterName]) {
       throw new HttpException(`Invalid Character Name: ${info.characterName}`, HttpStatus.BAD_REQUEST);
     }
-    // dbAccessor.upsertCharacter(info);
     await this.appService.update(info);
     return this.appService.getInfo();
   }

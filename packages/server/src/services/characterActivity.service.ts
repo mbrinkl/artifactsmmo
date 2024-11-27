@@ -1,24 +1,23 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { CharInfo } from "../models/dbCharInfo";
+import { CharacterActivity } from "../models/characterActivity.model";
 import { Repository } from "typeorm";
 import { Activity, CharacterInfo } from "@artifacts/shared";
 
 @Injectable()
-export class UserService {
+export class CharacterActivityService {
   constructor(
-    @InjectRepository(CharInfo)
-    private readonly userRepository: Repository<CharInfo>,
+    @InjectRepository(CharacterActivity)
+    private readonly userRepository: Repository<CharacterActivity>,
   ) {}
 
-  async create(info: CharacterInfo): Promise<CharInfo> {
-    const data: Partial<CharInfo> = {
+  async upsert(info: CharacterInfo): Promise<void> {
+    const data: Partial<CharacterActivity> = {
       name: info.characterName,
       activityName: info.activity ? info.activity.name : null,
       activityParams: info.activity ? JSON.stringify(info.activity.params) : null,
     };
-    const user = this.userRepository.create(data);
-    return this.userRepository.save(user);
+    await this.userRepository.upsert(data, ["name"]);
   }
 
   async findAll(): Promise<CharacterInfo[]> {
@@ -30,7 +29,7 @@ export class UserService {
           ? null
           : ({
               name: x.activityName,
-              params: JSON.parse(x.activityParams),
+              params: JSON.parse(x.activityParams!),
             } as Activity),
     }));
   }

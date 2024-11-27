@@ -3,10 +3,19 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { CharInfo } from "./models/dbCharInfo";
+import { CharacterActivity } from "./models/characterActivity.model";
 import { AuthGuard } from "./common/guards/auth.guard";
-import { UserService } from "./services/dbCharInfoRepository";
+import { CharacterActivityService } from "./services/characterActivity.service";
 import { APP_GUARD } from "@nestjs/core";
+import { ArtifactsApiService } from "./services/ArtifactsApiService";
+
+const getDbFilePath = (envPath: string | undefined) => {
+  let dbPath = envPath || "";
+  if (dbPath && !dbPath.endsWith("/")) {
+    dbPath += "/";
+  }
+  return dbPath + "db.sqlite";
+};
 
 @Module({
   imports: [
@@ -15,16 +24,17 @@ import { APP_GUARD } from "@nestjs/core";
     }),
     TypeOrmModule.forRoot({
       type: "sqlite",
-      database: process.env.DB_PATH || "db.sqlite",
-      entities: [CharInfo], // Register all your entities here
-      synchronize: true, // Automatically creates database and tables
+      database: getDbFilePath(process.env.db_path),
+      entities: [CharacterActivity],
+      synchronize: true,
     }),
-    TypeOrmModule.forFeature([CharInfo]),
+    TypeOrmModule.forFeature([CharacterActivity]),
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    UserService,
+    ArtifactsApiService,
+    CharacterActivityService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,

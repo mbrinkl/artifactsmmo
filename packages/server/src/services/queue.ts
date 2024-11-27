@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import pino, { Logger } from "pino";
-import { ActionResultData, CharacterInfo } from "@artifacts/shared";
-import { getCharacter } from "../api";
+import { CharacterInfo } from "@artifacts/shared";
 import { delayMs, delayUntil, initialQueueFactory } from "./util";
 import { ActivityContext } from "@artifacts/shared";
 import { AppService } from "src/app.service";
+import { Logger } from "@nestjs/common";
+import { ArtifactsApiService, QueueAction } from "./ArtifactsApiService";
 
-type ActionFn = (name: string, payload?: any) => Promise<ActionResultData | null>;
+type X = Awaited<ReturnType<InstanceType<typeof ArtifactsApiService>["doIt"]>>;
 
-export interface QueueItem<TContext = any, T extends ActionFn = any> {
-  action: T;
-  payload?: any;
-  onExecuted?: (res: ReturnType<T>, context: TContext) => QueueItem<TContext>[];
+export interface QueueItem<TContext = any> {
+  action: QueueAction;
+  onExecuted?: (res: X, context: TContext) => QueueItem<TContext>[];
 }
 
 export class Queuey {
@@ -19,18 +18,19 @@ export class Queuey {
   private activityCtx: ActivityContext | null;
   private queue: QueueItem[];
   private aborted: boolean;
-  private logger: pino.Logger;
+  private logger: Logger;
 
   constructor(
     ctx: CharacterInfo,
     private serverState: AppService,
-    logger: Logger,
+    private readonly client: ArtifactsApiService,
   ) {
+    console.log("created...", ctx);
     this.info = ctx;
     this.activityCtx = null;
     this.queue = [];
     this.aborted = false;
-    this.logger = logger.child({ name: ctx.characterName });
+    this.logger = new Logger(ctx.characterName);
   }
 
   // mark as aborted to prevent any actions happening before class instance is destroyed
@@ -42,10 +42,10 @@ export class Queuey {
   async initialize() {
     if (!this.info.activity) return;
 
-    const initialCharacterState = await getCharacter(this.info.characterName);
+    const initialCharacterState = await this.client.getCharacter(this.info.characterName);
 
     if (initialCharacterState.cooldown_expiration) {
-      this.logger.info("Awaiting existing cooldown");
+      this.logger.log("Awaiting existing cooldown");
       await delayUntil(initialCharacterState.cooldown_expiration);
     }
 
@@ -68,7 +68,7 @@ export class Queuey {
   }
 
   private async execute() {
-    this.logger.info(`[ ${this.queue.map((x) => x.action.name).join()} ]`);
+    this.logger.log(`[ ${this.queue.map((x) => x.action.type).join()} ]`);
 
     try {
       const nextItem = this.queue.shift();
@@ -77,8 +77,9 @@ export class Queuey {
       }
 
       this.concurrencyCheck();
-      this.logger.info("executing", nextItem?.action.name, nextItem?.payload);
-      const result = await nextItem.action(this.info.characterName, nextItem.payload);
+      this.logger.log(`executing ${nextItem?.action.type}, ${nextItem?.action.payload}`);
+      const result = await this.client.doIt(this.info.characterName, nextItem.action);
+      //const result = await nextItem.action(this.info.characterName, nextItem.payload);
 
       // TODO handle null result instead of passing null to onExecuted
 
@@ -86,10 +87,10 @@ export class Queuey {
       if (next) {
         this.concurrencyCheck();
         this.queue = this.queue.concat(next);
-        this.logger.info(`Updated pipeline: [ ${this.queue.map((x) => x.action.name).join()} ]`);
+        this.logger.log(`Updated pipeline: [ ${this.queue.map((x) => x.action.type).join()} ]`);
       }
 
-      this.logger.info("cooldown:", result?.character.cooldown || "none");
+      this.logger.log("cooldown: " + result?.character.cooldown || "none");
 
       if (result?.character.cooldown) {
         await delayMs(result.character.cooldown * 1000);

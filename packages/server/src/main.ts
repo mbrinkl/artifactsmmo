@@ -3,9 +3,11 @@ import { AppModule } from "./app.module";
 import { DEFAULT_PORT } from "@artifacts/shared";
 
 const bootstrap = async () => {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
   app.setGlobalPrefix("api");
-  app.enableCors();
+  if (process.env.NODE_ENV !== "production") {
+    app.enableCors();
+  }
   await app.listen(process.env.PORT || DEFAULT_PORT);
 };
 

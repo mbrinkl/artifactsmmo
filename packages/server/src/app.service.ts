@@ -1,18 +1,20 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
-import { getLogger } from "./services/logger";
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { CharacterInfo, Encyclopedia } from "@artifacts/shared";
 import { CharacterContext } from "./types";
 import { Queuey } from "./services/queue";
-import { getCharacters, getItems, getMaps, getMonsters, getResources } from "./api";
-import { UserService } from "./services/dbCharInfoRepository";
+import { CharacterActivityService } from "./services/characterActivity.service";
+import { ArtifactsApiService } from "./services/ArtifactsApiService";
 
 @Injectable()
 export class AppService implements OnModuleInit {
-  private logger = getLogger(AppService.name);
+  private logger = new Logger(AppService.name);
   ctxMap: Record<string, CharacterContext>;
   encyclopedia: Encyclopedia;
 
-  constructor(private readonly userService: UserService) {
+  constructor(
+    private readonly characterActivityService: CharacterActivityService,
+    private readonly client: ArtifactsApiService,
+  ) {
     this.ctxMap = {};
     this.encyclopedia = {
       items: [],
@@ -22,7 +24,7 @@ export class AppService implements OnModuleInit {
     };
   }
 
-  async update(info: CharacterInfo): Promise<void> {
+  async update(info: CharacterInfo, updateDb: boolean = true): Promise<void> {
     const existing = this.ctxMap[info.characterName];
     if (existing?.q) {
       existing.q.abort();
@@ -30,52 +32,32 @@ export class AppService implements OnModuleInit {
 
     this.ctxMap[info.characterName] = info;
 
-    if (this.ctxMap[info.characterName].activity === null) {
-      return;
+    if (updateDb) {
+      await this.characterActivityService.upsert(info);
     }
-
-    const q = new Queuey(info, this, this.logger);
-    q.initialize();
-    this.ctxMap[info.characterName].q = q;
-  }
-
-  async initty(info: CharacterInfo) {
-    this.ctxMap[info.characterName] = info;
 
     if (this.ctxMap[info.characterName].activity === null) {
       return;
     }
 
-    const q = new Queuey(info, this, this.logger);
+    const q = new Queuey(info, this, this.client);
     q.initialize();
     this.ctxMap[info.characterName].q = q;
   }
 
   async onModuleInit() {
-    this.logger.info("fetching assets");
-    const start = Date.now();
-    const [characters, squares, items, resources, monsters] = await Promise.all([
-      getCharacters(),
-      getMaps(),
-      getItems(),
-      getResources(),
-      getMonsters(),
-    ]);
-    this.logger.info(`fetched assets in ${Date.now() - start}ms`);
-
-    this.encyclopedia.squares = squares;
-    this.encyclopedia.items = items;
-    this.encyclopedia.resources = resources;
-    this.encyclopedia.monsters = monsters;
+    const [characters, encyclopedia] = await this.client.getInitialData();
+    this.encyclopedia = encyclopedia;
 
     const characterNames = characters.map((x) => x.name);
-    const storedCharacterInfo = await this.userService.findAll();
+    const storedCharacterInfo = await this.characterActivityService.findAll();
+    console.log("stored is", storedCharacterInfo);
 
     characterNames.forEach((characterName) => {
       const stored = storedCharacterInfo.find((x) => x.characterName === characterName);
       if (stored) {
-        this.logger.info(`${characterName} Restored Activity - ${stored.activity.name}`);
-        this.update(stored);
+        this.logger.log(`${characterName} Restored Activity - ${stored.activity?.name}`);
+        this.update(stored, false);
       } else {
         this.update({ characterName, activity: null });
       }

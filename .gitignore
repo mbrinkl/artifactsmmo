@@ -3,4 +3,4 @@ dist
 .env
 .vscode/*
 !.vscode/extensions.json
-local.db
+db.sqlite

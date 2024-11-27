@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class CharInfo {
+export class CharacterActivity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -9,8 +9,8 @@ export class CharInfo {
   name: string;
 
   @Column({ nullable: true })
-  activityName: string;
+  activityName: string | null;
 
   @Column({ nullable: true })
-  activityParams: string;
+  activityParams: string | null;
 }
