@@ -16,6 +16,7 @@ export class CharacterActivityService {
       name: info.characterName,
       activityName: info.activity ? info.activity.name : null,
       activityParams: info.activity ? JSON.stringify(info.activity.params) : null,
+      error: info.error,
     };
     await this.userRepository.upsert(data, ["name"]);
   }
@@ -31,6 +32,7 @@ export class CharacterActivityService {
               name: x.activityName,
               params: JSON.parse(x.activityParams!),
             } as Activity),
+      error: x.error,
     }));
   }
 }

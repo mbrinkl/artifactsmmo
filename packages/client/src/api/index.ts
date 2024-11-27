@@ -2,33 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CharacterInfo, Encyclopedia } from "@artifacts/shared";
 import { serverUrl } from "../config";
 
-const getEncyclopedia = async (token: string): Promise<Encyclopedia> => {
-  const response = await fetch(serverUrl + "/api/encyclopedia", {
-    headers: { Authorization: "Bearer " + token, Accept: "application/json" },
-  });
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(err);
-  }
-  return await response.json();
-};
-
-const getDashboardData = async (token: string): Promise<CharacterInfo[]> => {
-  const response = await fetch(serverUrl + "/api/characters", {
-    headers: { Authorization: "Bearer " + token, Accept: "application/json" },
-  });
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(err);
-  }
-  return await response.json();
-};
-
-const updateActivity = async (token: string, characterInfo: CharacterInfo): Promise<CharacterInfo[]> => {
-  const response = await fetch(serverUrl + "/api/update", {
-    method: "POST",
-    body: JSON.stringify(characterInfo),
+const fetcher = async <T>(path: string, token: string, method: "GET" | "POST" = "GET", body?: BodyInit): Promise<T> => {
+  const url = new URL(serverUrl + path);
+  const response = await fetch(url, {
+    method,
     headers: { Authorization: "Bearer " + token, Accept: "application/json", "Content-Type": "application/json" },
+    body,
   });
   if (!response.ok) {
     const err = await response.text();
@@ -37,16 +16,16 @@ const updateActivity = async (token: string, characterInfo: CharacterInfo): Prom
   return await response.json();
 };
 
-export const useGetEncyclopdieaQuery = (token: string) =>
+export const useGetEncyclopediaQuery = (token: string) =>
   useQuery({
-    queryKey: ["initial"],
-    queryFn: () => getEncyclopedia(token),
+    queryKey: ["encyclopedia"],
+    queryFn: () => fetcher<Encyclopedia>("/encyclopedia", token),
   });
 
 export const useGetDashboardDataQuery = (token: string) =>
   useQuery({
-    queryKey: ["dashboard-data"],
-    queryFn: () => getDashboardData(token),
+    queryKey: ["characters"],
+    queryFn: () => fetcher<CharacterInfo[]>("/characters", token),
     refetchInterval: 15000,
     retry: false,
   });
@@ -56,7 +35,7 @@ export const useUpdateActivityMutation = () => {
 
   return useMutation({
     mutationFn: ({ token, characterInfo }: { token: string; characterInfo: CharacterInfo }) =>
-      updateActivity(token, characterInfo),
+      fetcher<CharacterInfo[]>("/update", token, "POST", JSON.stringify(characterInfo)),
     onSuccess: (data) => {
       queryClient.setQueryData(["dashboard-data"], data);
     },

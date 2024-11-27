@@ -1,15 +1,16 @@
-import { Loader, Stack, Text } from "@mantine/core";
+import { Button, Container, Loader, Stack, Text } from "@mantine/core";
 import { CharacterInfo } from "@artifacts/shared";
-import { useGetDashboardDataQuery, useGetEncyclopdieaQuery, useUpdateActivityMutation } from "../api";
+import { useGetDashboardDataQuery, useGetEncyclopediaQuery, useUpdateActivityMutation } from "../api";
 import { DashboardCharacter } from "./DashboardCharacter";
 
 interface DashboardProps {
   token: string;
+  clearToken: () => void;
 }
 
 export const Dashboard = (props: DashboardProps) => {
   const characterQuery = useGetDashboardDataQuery(props.token);
-  const encyclopediaQuery = useGetEncyclopdieaQuery(props.token);
+  const encyclopediaQuery = useGetEncyclopediaQuery(props.token);
   const updateActivityMutation = useUpdateActivityMutation();
 
   const update = (characterInfo: CharacterInfo) => {
@@ -33,15 +34,21 @@ export const Dashboard = (props: DashboardProps) => {
   }
 
   return (
-    <Stack>
-      {characterQuery.data.map((character) => (
-        <DashboardCharacter
-          key={character.characterName}
-          character={character}
-          encyclopedia={encyclopediaQuery.data}
-          update={update}
-        />
-      ))}
-    </Stack>
+    <Container>
+      <Stack>
+        <Stack>
+          <Button onClick={props.clearToken}>Clear Token</Button>
+          <Button onClick={props.clearToken}>Stop All</Button>
+        </Stack>
+        {characterQuery.data.map((character) => (
+          <DashboardCharacter
+            key={character.characterName}
+            character={character}
+            encyclopedia={encyclopediaQuery.data}
+            update={update}
+          />
+        ))}
+      </Stack>
+    </Container>
   );
 };

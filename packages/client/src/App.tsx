@@ -2,9 +2,8 @@ import { useState } from "react";
 import { tokenStorageKey } from "./config";
 import { Login } from "./components/Login";
 import { Dashboard } from "./components/Dashboard";
-import { Button, Container } from "@mantine/core";
 
-const App = () => {
+export const App = () => {
   const [token, setToken] = useState(localStorage.getItem(tokenStorageKey));
 
   const updateToken = (value: string) => {
@@ -21,12 +20,5 @@ const App = () => {
     return <Login updateToken={updateToken} />;
   }
 
-  return (
-    <Container>
-      <Button onClick={clearToken}>Clear Token</Button>
-      <Dashboard token={token} />
-    </Container>
-  );
+  return <Dashboard token={token} clearToken={clearToken} />;
 };
-
-export default App;

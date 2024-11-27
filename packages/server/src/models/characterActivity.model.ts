@@ -13,4 +13,7 @@ export class CharacterActivity {
 
   @Column({ nullable: true })
   activityParams: string | null;
+
+  @Column({ nullable: true })
+  error: string | null;
 }

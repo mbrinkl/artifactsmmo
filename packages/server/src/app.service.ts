@@ -31,12 +31,8 @@ export class AppService implements OnModuleInit {
     });
   }
 
-  hasCharacter(characterName: string): boolean {
-    return this.ctxMap.has(characterName);
-  }
-
   getAllCharacterInfo(): CharacterInfo[] {
-    return [...this.ctxMap.values()].map(({ characterName, activity }) => ({ characterName, activity }));
+    return [...this.ctxMap.values()].map(({ characterName, activity, error }) => ({ characterName, activity, error }));
   }
 
   async update(info: CharacterInfo, updateDb: boolean = true): Promise<void> {
@@ -51,6 +47,7 @@ export class AppService implements OnModuleInit {
     }
 
     ctx.activity = info.activity;
+    ctx.error = undefined;
 
     if (updateDb) {
       await this.characterActivityService.upsert(info);
@@ -61,12 +58,12 @@ export class AppService implements OnModuleInit {
     }
   }
 
-  private onQueueError(characterName: string): void {
+  private onQueueError(characterName: string, error: string): void {
     if (!this.ctxMap.has(characterName)) {
       this.logger.error("Invalid character name in onQueueError: " + characterName);
       return;
     }
-    this.ctxMap.set(characterName, { characterName, activity: null });
-    this.characterActivityService.upsert({ characterName, activity: null });
+    this.ctxMap.set(characterName, { characterName, activity: null, error });
+    this.characterActivityService.upsert({ characterName, activity: null, error });
   }
 }

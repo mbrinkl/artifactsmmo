@@ -22,7 +22,7 @@ export class Queue {
   constructor(
     ctx: CharacterInfo,
     private readonly encyclopedia: Encyclopedia,
-    private onError: (characterName: string) => void,
+    private onError: (characterName: string, error: string) => void,
     private readonly client: ArtifactsApiService,
   ) {
     this.info = ctx;
@@ -50,9 +50,6 @@ export class Queue {
     }
 
     try {
-      if (this.info.characterName === "Carlos") {
-        throw new Error("GG Idiot");
-      }
       this.concurrencyCheck();
       [this.queue, this.activityCtx] = initialQueueFactory(
         initialCharacterState,
@@ -115,7 +112,7 @@ export class Queue {
     }
     this.logger.error(err);
     this.queue = [];
-    this.onError(this.info.characterName);
+    this.onError(this.info.characterName, err.message);
   }
 
   private concurrencyCheck() {

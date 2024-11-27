@@ -28,26 +28,25 @@ export interface CraftParams {
   productCode: string;
 }
 
-export type Activity = { error?: string } & (
+export type Activity =
   | { name: "gather"; params: GatherParams }
   | { name: "craft"; params: CraftParams }
-  | { name: "fight"; params: FightParams }
-);
+  | { name: "fight"; params: FightParams };
 
 export type ActivityName = Activity["name"];
 export type ActivityParams = Activity["params"];
 export type ActivityContext = GatherContext | CraftContext | FightContext;
 
-type ExtractPropertyNames<T> = {
+type ExtractProperties<T> = {
   [Key in keyof T]: unknown;
 };
 type ActivityMap = {
-  [K in Activity as K["name"]]: ExtractPropertyNames<K["params"]>;
+  [K in Activity as K["name"]]: ExtractProperties<K["params"]>;
 };
 
-export const possibleContextsMap: ActivityMap = {
+export const initialParamsMap: ActivityMap = {
   gather: { squareCode: "" },
   craft: { productCode: "" },
   fight: { monsterCode: "" },
 };
-export const possibileActivityNames = Object.keys(possibleContextsMap);
+export const activityNames = Object.keys(initialParamsMap);
