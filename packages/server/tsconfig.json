@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.build.json",
   "compilerOptions": {
+    "types": ["vitest/globals"],
     "paths": {
       "@artifacts/shared": ["../shared/src"]
     }

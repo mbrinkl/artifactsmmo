@@ -4,10 +4,11 @@ import { AppService } from "./app.service";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { CharacterActivity } from "./models/characterActivity.model";
-import { AuthGuard } from "./common/guards/auth.guard";
+import { AuthGuard } from "./guards/auth.guard";
 import { CharacterActivityService } from "./services/characterActivity.service";
 import { APP_GUARD } from "@nestjs/core";
 import { ArtifactsApiService } from "./services/artifactsApi.service";
+import { InitialDataProvider } from "./providers/initialData.provider";
 
 const getDbFilePath = (envPath: string | undefined) => {
   let dbPath = envPath || "";
@@ -39,13 +40,7 @@ const getDbFilePath = (envPath: string | undefined) => {
     AppService,
     ArtifactsApiService,
     CharacterActivityService,
-    {
-      provide: "INITIAL_DATA",
-      useFactory: async (client: ArtifactsApiService) => {
-        return await client.getInitialData();
-      },
-      inject: [ArtifactsApiService],
-    },
+    InitialDataProvider,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
