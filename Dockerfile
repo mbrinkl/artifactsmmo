@@ -18,4 +18,4 @@ RUN cp -r ./packages/client/dist/* /srv
 
 EXPOSE 3000
 
-CMD [ "npx", "tsx", "packages/server/src/index.ts" ]
+CMD [ "node", "packages/server/dist/main.js" ]

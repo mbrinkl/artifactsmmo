@@ -1,5 +1,5 @@
 import { ActionResultData, Encyclopedia, GatherContext, GatherParams } from "@artifacts/shared";
-import { QueueItem } from "../services/queue";
+import { QueueItem } from "./queue";
 import { depositAll, getClosest, getInventoryNumItems } from "./loopUtil";
 
 export const getGatherContext = (encyclopedia: Encyclopedia, params: GatherParams): GatherContext => {

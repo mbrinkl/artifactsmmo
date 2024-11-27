@@ -5,8 +5,7 @@
     "typecheck": "tsc --noEmit",
     "build": "nest build",
     "dev": "nest start --watch --preserveWatchOutput",
-    "dev:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main"
+    "dev:debug": "nest start --debug --watch"
   },
   "dependencies": {
     "@artifacts/shared": "file:../shared",

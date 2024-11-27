@@ -1,5 +1,5 @@
 import { ActionResultData, Encyclopedia, FightContext, FightParams } from "@artifacts/shared";
-import { QueueItem } from "../services/queue";
+import { QueueItem } from "./queue";
 import { depositAll, getClosest, getInventoryNumItems } from "./loopUtil";
 
 export const getFightContext = (encyclopedia: Encyclopedia, params: FightParams): FightContext => {

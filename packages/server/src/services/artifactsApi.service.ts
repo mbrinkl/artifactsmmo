@@ -1,7 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import {
   ActionResultData,
-  Character,
   Destination,
   Drop,
   Encyclopedia,
@@ -12,6 +11,11 @@ import {
   Square,
 } from "@artifacts/shared";
 import createClient from "openapi-fetch";
+
+export interface InitialData {
+  characterNames: string[];
+  encyclopedia: Encyclopedia;
+}
 
 export type QueueAction =
   | {
@@ -68,7 +72,7 @@ export class ArtifactsApiService {
     throw new Error("Invalid action type: " + name);
   }
 
-  async getInitialData(): Promise<[Character[], Encyclopedia]> {
+  async getInitialData(): Promise<InitialData> {
     this.logger.log("fetching assets");
     const start = Date.now();
     const [characters, squares, items, resources, monsters] = await Promise.all([
@@ -79,7 +83,8 @@ export class ArtifactsApiService {
       this.getMonsters(),
     ]);
     this.logger.log(`fetched assets in ${Date.now() - start}ms`);
-    return [characters, { items, squares, resources, monsters }];
+    const characterNames = characters.map((x) => x.name);
+    return { characterNames, encyclopedia: { items, squares, resources, monsters } };
   }
 
   async getCharacters() {

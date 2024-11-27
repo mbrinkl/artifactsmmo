@@ -1,8 +1,8 @@
 import { Activity, ActivityContext, Character, Encyclopedia } from "@artifacts/shared";
 import { QueueItem } from "./queue";
-import { craftQueueBuilder, getCraftContext } from "../queue-builders/craftQueueBuilder";
-import { gatherQueueBuilder, getGatherContext } from "../queue-builders/gatherQueueBuilder";
-import { fightQueueBuilder, getFightContext } from "../queue-builders/fightQueueBuilder";
+import { craftQueueBuilder, getCraftContext } from "./craftQueueBuilder";
+import { gatherQueueBuilder, getGatherContext } from "./gatherQueueBuilder";
+import { fightQueueBuilder, getFightContext } from "./fightQueueBuilder";
 
 export const delayMs = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));

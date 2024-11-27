@@ -1,76 +1,72 @@
-import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
-import { CharacterInfo, Encyclopedia } from "@artifacts/shared";
-import { CharacterContext } from "./types";
-import { Queuey } from "./services/queue";
+import { Inject, Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import { CharacterInfo } from "@artifacts/shared";
+import { Queue } from "./queue/queue";
 import { CharacterActivityService } from "./services/characterActivity.service";
-import { ArtifactsApiService } from "./services/ArtifactsApiService";
+import { ArtifactsApiService, InitialData } from "./services/artifactsApi.service";
+
+export interface CharacterContext extends CharacterInfo {
+  q?: Queue;
+}
 
 @Injectable()
 export class AppService implements OnModuleInit {
   private logger = new Logger(AppService.name);
-  ctxMap: Record<string, CharacterContext>;
-  encyclopedia: Encyclopedia;
+  private ctxMap: Map<string, CharacterContext> = new Map();
 
   constructor(
     private readonly characterActivityService: CharacterActivityService,
     private readonly client: ArtifactsApiService,
-  ) {
-    this.ctxMap = {};
-    this.encyclopedia = {
-      items: [],
-      monsters: [],
-      resources: [],
-      squares: [],
-    };
+    @Inject("INITIAL_DATA") private readonly data: InitialData,
+  ) {}
+
+  async onModuleInit() {
+    const storedCharacterInfo = await this.characterActivityService.findAll();
+    this.data.characterNames.forEach((characterName) => {
+      const stored = storedCharacterInfo.find((x) => x.characterName === characterName);
+      const characterInfo = stored ?? { characterName, activity: null };
+      this.ctxMap.set(characterInfo.characterName, {
+        ...characterInfo,
+        q: new Queue(characterInfo, this.data.encyclopedia, this.onQueueError.bind(this), this.client),
+      });
+    });
+  }
+
+  hasCharacter(characterName: string): boolean {
+    return this.ctxMap.has(characterName);
+  }
+
+  getAllCharacterInfo(): CharacterInfo[] {
+    return [...this.ctxMap.values()].map(({ characterName, activity }) => ({ characterName, activity }));
   }
 
   async update(info: CharacterInfo, updateDb: boolean = true): Promise<void> {
-    const existing = this.ctxMap[info.characterName];
-    if (existing?.q) {
-      existing.q.abort();
+    if (!this.ctxMap.has(info.characterName)) {
+      this.logger.error("Invalid character name in update: " + info.characterName);
+      return;
     }
 
-    this.ctxMap[info.characterName] = info;
+    const ctx = this.ctxMap.get(info.characterName);
+    if (ctx?.q) {
+      ctx.q.abort();
+    }
+
+    ctx.activity = info.activity;
 
     if (updateDb) {
       await this.characterActivityService.upsert(info);
     }
 
-    if (this.ctxMap[info.characterName].activity === null) {
+    if (ctx.activity !== null) {
+      ctx.q = new Queue(info, this.data.encyclopedia, this.onQueueError.bind(this), this.client);
+    }
+  }
+
+  private onQueueError(characterName: string): void {
+    if (!this.ctxMap.has(characterName)) {
+      this.logger.error("Invalid character name in onQueueError: " + characterName);
       return;
     }
-
-    const q = new Queuey(info, this, this.client);
-    q.initialize();
-    this.ctxMap[info.characterName].q = q;
-  }
-
-  async onModuleInit() {
-    const [characters, encyclopedia] = await this.client.getInitialData();
-    this.encyclopedia = encyclopedia;
-
-    const characterNames = characters.map((x) => x.name);
-    const storedCharacterInfo = await this.characterActivityService.findAll();
-    console.log("stored is", storedCharacterInfo);
-
-    characterNames.forEach((characterName) => {
-      const stored = storedCharacterInfo.find((x) => x.characterName === characterName);
-      if (stored) {
-        this.logger.log(`${characterName} Restored Activity - ${stored.activity?.name}`);
-        this.update(stored, false);
-      } else {
-        this.update({ characterName, activity: null });
-      }
-    });
-  }
-
-  onQueueError(characterName: string): void {
-    this.ctxMap[characterName].activity = null;
-    this.ctxMap[characterName].q = undefined;
-    // update db to null activity?
-  }
-
-  getInfo(): CharacterInfo[] {
-    return Object.values(this.ctxMap).map((v) => ({ characterName: v.characterName, activity: v.activity }));
+    this.ctxMap.set(characterName, { characterName, activity: null });
+    this.characterActivityService.upsert({ characterName, activity: null });
   }
 }

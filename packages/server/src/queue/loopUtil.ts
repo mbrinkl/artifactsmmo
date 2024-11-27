@@ -1,5 +1,5 @@
 import { Character, Destination, Encyclopedia } from "@artifacts/shared";
-import { QueueItem } from "../services/queue";
+import { QueueItem } from "./queue";
 
 export const getInventoryNumItems = ({ inventory }: Character): number => {
   return inventory.reduce((a, b) => a + b.quantity, 0);

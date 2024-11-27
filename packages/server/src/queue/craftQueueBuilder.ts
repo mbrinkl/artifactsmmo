@@ -1,5 +1,5 @@
 import { ActionResultData, coords, CraftContext, CraftParams, Encyclopedia } from "@artifacts/shared";
-import { QueueItem } from "../services/queue";
+import { QueueItem } from "./queue";
 
 export const getCraftContext = (encyclopedia: Encyclopedia, params: CraftParams): CraftContext => {
   const productItem = encyclopedia.items.find((x) => x.code === params.productCode);

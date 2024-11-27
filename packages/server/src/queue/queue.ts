@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CharacterInfo } from "@artifacts/shared";
+import { CharacterInfo, Encyclopedia } from "@artifacts/shared";
 import { delayMs, delayUntil, initialQueueFactory } from "./util";
 import { ActivityContext } from "@artifacts/shared";
-import { AppService } from "src/app.service";
 import { Logger } from "@nestjs/common";
-import { ArtifactsApiService, QueueAction } from "./ArtifactsApiService";
+import { ArtifactsApiService, QueueAction } from "../services/artifactsApi.service";
 
 type X = Awaited<ReturnType<InstanceType<typeof ArtifactsApiService>["doIt"]>>;
 
@@ -13,7 +12,7 @@ export interface QueueItem<TContext = any> {
   onExecuted?: (res: X, context: TContext) => QueueItem<TContext>[];
 }
 
-export class Queuey {
+export class Queue {
   private info: CharacterInfo;
   private activityCtx: ActivityContext | null;
   private queue: QueueItem[];
@@ -22,15 +21,16 @@ export class Queuey {
 
   constructor(
     ctx: CharacterInfo,
-    private serverState: AppService,
+    private readonly encyclopedia: Encyclopedia,
+    private onError: (characterName: string) => void,
     private readonly client: ArtifactsApiService,
   ) {
-    console.log("created...", ctx);
     this.info = ctx;
     this.activityCtx = null;
     this.queue = [];
     this.aborted = false;
     this.logger = new Logger(ctx.characterName);
+    this.initialize();
   }
 
   // mark as aborted to prevent any actions happening before class instance is destroyed
@@ -50,11 +50,14 @@ export class Queuey {
     }
 
     try {
+      if (this.info.characterName === "Carlos") {
+        throw new Error("GG Idiot");
+      }
       this.concurrencyCheck();
       [this.queue, this.activityCtx] = initialQueueFactory(
         initialCharacterState,
         this.info.activity,
-        this.serverState.encyclopedia,
+        this.encyclopedia,
       );
       if (!this.queue || !this.activityCtx) {
         throw new Error("Failed to create initial queue");
@@ -112,7 +115,7 @@ export class Queuey {
     }
     this.logger.error(err);
     this.queue = [];
-    this.serverState.onQueueError(this.info.characterName);
+    this.onError(this.info.characterName);
   }
 
   private concurrencyCheck() {
