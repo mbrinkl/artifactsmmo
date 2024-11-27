@@ -28,4 +28,10 @@ export class AppController {
     await this.appService.update(info);
     return this.appService.getAllCharacterInfo();
   }
+
+  @Post("clear-all")
+  clearAll(): CharacterInfo[] {
+    this.appService.clearAll();
+    return this.appService.getAllCharacterInfo();
+  }
 }

@@ -37,7 +37,18 @@ export const useUpdateActivityMutation = () => {
     mutationFn: ({ token, characterInfo }: { token: string; characterInfo: CharacterInfo }) =>
       fetcher<CharacterInfo[]>("/update", token, "POST", JSON.stringify(characterInfo)),
     onSuccess: (data) => {
-      queryClient.setQueryData(["dashboard-data"], data);
+      queryClient.setQueryData(["characters"], data);
+    },
+  });
+};
+
+export const useClearAllMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ token }: { token: string }) => fetcher<CharacterInfo[]>("/clear-all", token, "POST"),
+    onSuccess: (data) => {
+      queryClient.setQueryData(["characters"], data);
     },
   });
 };

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Activity, ActivityName, ActivityParams, CharacterInfo, Encyclopedia } from "@artifacts/shared";
-import { Button, Paper, Text } from "@mantine/core";
+import { Button, Flex, Paper, Text } from "@mantine/core";
 import styles from "./DashboardCharacter.module.css";
 import { ActivitySelector } from "./ActivitySelector";
 
@@ -50,8 +50,14 @@ export const DashboardCharacter = ({ character, update, encyclopedia }: Dashboar
         setSelectedActivityParams={setSelectedActivityParams}
         encyclopedia={encyclopedia}
       />
-      <Button onClick={updateActivity}>Update</Button>
-      {isActive && <Button onClick={clearActivity}>Stop</Button>}
+      <Flex gap="md">
+        <Button onClick={updateActivity}>Update</Button>
+        {isActive && (
+          <Button onClick={clearActivity} color="red">
+            Stop
+          </Button>
+        )}
+      </Flex>
     </Paper>
   );
 };

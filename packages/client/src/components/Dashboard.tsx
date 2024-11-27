@@ -1,6 +1,11 @@
-import { Button, Container, Loader, Stack, Text } from "@mantine/core";
+import { Button, Container, Flex, Loader, Stack, Text } from "@mantine/core";
 import { CharacterInfo } from "@artifacts/shared";
-import { useGetDashboardDataQuery, useGetEncyclopediaQuery, useUpdateActivityMutation } from "../api";
+import {
+  useClearAllMutation,
+  useGetDashboardDataQuery,
+  useGetEncyclopediaQuery,
+  useUpdateActivityMutation,
+} from "../api";
 import { DashboardCharacter } from "./DashboardCharacter";
 
 interface DashboardProps {
@@ -12,9 +17,14 @@ export const Dashboard = (props: DashboardProps) => {
   const characterQuery = useGetDashboardDataQuery(props.token);
   const encyclopediaQuery = useGetEncyclopediaQuery(props.token);
   const updateActivityMutation = useUpdateActivityMutation();
+  const clearAllMutation = useClearAllMutation();
 
   const update = (characterInfo: CharacterInfo) => {
     updateActivityMutation.mutate({ token: props.token, characterInfo });
+  };
+
+  const clearAll = () => {
+    clearAllMutation.mutate({ token: props.token });
   };
 
   if (characterQuery.error || encyclopediaQuery.error) {
@@ -36,10 +46,14 @@ export const Dashboard = (props: DashboardProps) => {
   return (
     <Container>
       <Stack>
-        <Stack>
-          <Button onClick={props.clearToken}>Clear Token</Button>
-          <Button onClick={props.clearToken}>Stop All</Button>
-        </Stack>
+        <Flex gap="md">
+          <Button onClick={props.clearToken} color="yellow">
+            Clear Token
+          </Button>
+          <Button onClick={clearAll} color="red">
+            Stop All
+          </Button>
+        </Flex>
         {characterQuery.data.map((character) => (
           <DashboardCharacter
             key={character.characterName}

@@ -58,6 +58,16 @@ export class AppService implements OnModuleInit {
     }
   }
 
+  clearAll() {
+    this.ctxMap.forEach(async (value, key, map) => {
+      if (value.q) {
+        value.q.abort();
+      }
+      map.set(key, { characterName: value.characterName, activity: null });
+      await this.characterActivityService.upsert({ characterName: value.characterName, activity: null });
+    });
+  }
+
   private onQueueError(characterName: string, error: string): void {
     if (!this.ctxMap.has(characterName)) {
       this.logger.error("Invalid character name in onQueueError: " + characterName);
