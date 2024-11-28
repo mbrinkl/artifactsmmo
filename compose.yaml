@@ -2,7 +2,7 @@ services:
   server:
     build:
       context: .
-      dockerfile: ./packages/server/Dockerfile
+      target: server
     environment:
       NODE_ENV: production
       db_path: /data
@@ -15,7 +15,7 @@ services:
   caddy:
     build:
       context: .
-      dockerfile: ./packages/client/Dockerfile
+      target: caddy
     environment:
       NODE_ENV: production
       host_name: ${host_name}

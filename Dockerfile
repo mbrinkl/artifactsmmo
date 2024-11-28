@@ -6,18 +6,22 @@ COPY package.json ./
 COPY package-lock.json ./
 COPY packages/shared/package.json ./packages/shared/package.json
 COPY packages/client/package.json ./packages/client/package.json
+COPY packages/server/package.json ./packages/server/package.json
 
 RUN npm install
  
 COPY . .
 
-RUN npm run build:client
+RUN npm run build
 
-# Stage 2: Serve static files with Caddy
-FROM caddy:2
+FROM caddy:2 AS caddy
 
-# Set the working directory
 WORKDIR /srv
 
-# Copy static files from the build stage
 COPY --from=builder /app/packages/client/dist /srv
+
+FROM builder AS server
+
+EXPOSE 3000
+
+CMD [ "node", "packages/server/dist/main.js" ]
