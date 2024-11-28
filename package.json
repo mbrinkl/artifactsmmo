@@ -12,6 +12,8 @@
     "client": "npm run dev --workspace=packages/client",
     "dev": "concurrently -c cyan,magenta npm:server npm:client",
     "build": "npm run build --workspaces",
+    "build:server": "npm run build --workspace=packages/shared --workspace=packages/server",
+    "build:client": "npm run build --workspace=packages/shared --workspace=packages/client",
     "lint": "eslint .",
     "typecheck": "npm run typecheck --workspaces",
     "check": "npm run lint && npm run typecheck",
