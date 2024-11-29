@@ -1,7 +1,6 @@
 services:
   server:
-    build:
-      context: .
+    image: mbrinkl/artifactsmmo-client
     environment:
       NODE_ENV: production
       db_path: /data

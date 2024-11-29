@@ -1,6 +1,7 @@
 node_modules
 dist
 .env
+!example/.env
 .vscode/*
 !.vscode/extensions.json
 db.sqlite
