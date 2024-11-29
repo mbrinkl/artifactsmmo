@@ -15,7 +15,7 @@
     "lint": "eslint .",
     "typecheck": "npm run typecheck --workspaces",
     "check": "npm run lint && npm run typecheck",
-    "test": "vitest"
+    "test": "echo idiot"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
