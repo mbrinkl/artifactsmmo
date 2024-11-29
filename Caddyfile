@@ -1,5 +1,3 @@
 {$host_name}
 
-reverse_proxy /api/* server:3000
-
-file_server
+reverse_proxy * server:3000

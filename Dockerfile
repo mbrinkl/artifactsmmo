@@ -1,4 +1,4 @@
-FROM node:20 as builder
+FROM node:20 AS builder
  
 WORKDIR /app
 
@@ -14,13 +14,7 @@ COPY . .
 
 RUN npm run build
 
-FROM caddy:2 AS caddy
-
-WORKDIR /srv
-
-COPY --from=builder /app/packages/client/dist /srv
-
-FROM builder AS server
+RUN cp -r packages/client/dist/* /srv
 
 EXPOSE 3000
 

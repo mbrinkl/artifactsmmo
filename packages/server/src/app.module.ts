@@ -9,6 +9,7 @@ import { CharacterActivityService } from "./services/characterActivity.service";
 import { APP_GUARD } from "@nestjs/core";
 import { ArtifactsApiService } from "./services/artifactsApi.service";
 import { InitialDataProvider } from "./providers/initialData.provider";
+import { ServeStaticModule } from "@nestjs/serve-static";
 
 const getDbFilePath = (envPath: string | undefined) => {
   let dbPath = envPath || "";
@@ -26,7 +27,12 @@ const getDbFilePath = (envPath: string | undefined) => {
             envFilePath: "../../.env",
           }),
         ]
-      : []),
+      : [
+          ServeStaticModule.forRoot({
+            rootPath: "/srv",
+            exclude: ["/api/(.*)"],
+          }),
+        ]),
     TypeOrmModule.forRoot({
       type: "sqlite",
       database: getDbFilePath(process.env.db_path),

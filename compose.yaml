@@ -2,7 +2,6 @@ services:
   server:
     build:
       context: .
-      target: server
     environment:
       NODE_ENV: production
       db_path: /data
@@ -13,11 +12,9 @@ services:
       - 3000:3000
 
   caddy:
-    build:
-      context: .
-      target: caddy
+    image: caddy:2-alpine
+    restart: unless-stopped
     environment:
-      NODE_ENV: production
       host_name: ${host_name}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
