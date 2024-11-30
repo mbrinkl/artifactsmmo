@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Activity, ActivityName, ActivityParams, CharacterInfo, Encyclopedia } from "@artifacts/shared";
-import { Button, Flex, Paper, Text } from "@mantine/core";
-import styles from "./DashboardCharacter.module.css";
+import { Button, Flex, Group, Image, Paper, Text } from "@mantine/core";
 import { ActivitySelector } from "./ActivitySelector";
+import styles from "./DashboardCharacter.module.css";
 
 interface DashboardCharacterProps {
   character: CharacterInfo;
@@ -32,32 +32,46 @@ export const DashboardCharacter = ({ character, update, encyclopedia }: Dashboar
 
   const isActive = character.activity !== null;
 
+  const getFormattedActivity = (activity: Activity | null): string => {
+    if (!activity) {
+      return "none";
+    }
+    const params = Object.values(activity.params).join(", ");
+    return `${activity.name} ${params}`;
+  };
+
   return (
-    <Paper className={`${styles.container} ${isActive ? styles.active : styles.inactive}`}>
-      <Text size="lg">{character.characterName}</Text>
-      {character.activity ? (
-        <Text size="md">
-          {character.activity.name} {JSON.stringify(character.activity.params)}
-        </Text>
-      ) : (
-        <Text size="md">None</Text>
-      )}
-      {character.error && <Text>Error: {character.error}</Text>}
+    <Paper p="sm" className={`${styles.container} ${isActive ? styles.active : styles.inactive}`}>
+      <Flex justify="center" direction="column" style={{ textAlign: "center" }}>
+        <Flex justify="center" align="center" gap="sm">
+          <Image mah={50} w="auto" fit="contain" src="https://artifactsmmo.com/images/characters/men1.png" />
+          <Text size="xl" fw="bold">
+            {character.characterName}
+          </Text>
+        </Flex>
+        {character.error && <Text>Error: {character.error}</Text>}
+        <Text>Default Activity: none</Text>
+        <Text>Stats: ...</Text>
+      </Flex>
+
+      <Flex direction="column" gap="sm" pb="sm">
+        <Text size="md">Current Activity: {getFormattedActivity(character.activity)}</Text>
+        <Group gap="sm">
+          <Button onClick={clearActivity} disabled={!isActive} color="red">
+            Stop
+          </Button>
+          <Button disabled={!isActive}>Set as Default</Button>
+        </Group>
+      </Flex>
+
       <ActivitySelector
         selectedActivityName={selectedActivityName}
         selectedActivityParams={selectedActivityParams}
         setSelectedActivityName={setSelectedActivityName}
         setSelectedActivityParams={setSelectedActivityParams}
+        onUpdateClick={updateActivity}
         encyclopedia={encyclopedia}
       />
-      <Flex gap="md">
-        <Button onClick={updateActivity}>Update</Button>
-        {isActive && (
-          <Button onClick={clearActivity} color="red">
-            Stop
-          </Button>
-        )}
-      </Flex>
     </Paper>
   );
 };

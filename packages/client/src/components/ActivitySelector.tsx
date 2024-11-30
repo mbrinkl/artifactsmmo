@@ -1,5 +1,5 @@
 import { ActivityName, activityNames, ActivityParams, Encyclopedia, initialParamsMap } from "@artifacts/shared";
-import { Select, Text } from "@mantine/core";
+import { Button, Select, Stack } from "@mantine/core";
 import { getParamsOptions } from "../util";
 
 interface ActivitySelectorProps {
@@ -8,6 +8,7 @@ interface ActivitySelectorProps {
   selectedActivityParams: ActivityParams | null;
   setSelectedActivityName: (activityName: ActivityName | null) => void;
   setSelectedActivityParams: (activity: ActivityParams | null) => void;
+  onUpdateClick: () => void;
 }
 
 export const ActivitySelector = (props: ActivitySelectorProps) => {
@@ -22,30 +23,29 @@ export const ActivitySelector = (props: ActivitySelectorProps) => {
   };
 
   return (
-    <div>
+    <Stack>
       <Select
         label="Activity"
         data={activityNames}
         value={props.selectedActivityName}
+        searchable
         onChange={(v) => onChangeActivityName(v as ActivityName)}
       />
-      {props.selectedActivityParams && (
-        <div>
-          <Text>Activity Context:</Text>
-          {Object.entries(props.selectedActivityParams).map(([key, value]) => {
-            return (
-              <Select
-                key={key}
-                label={key}
-                // todo: usememo and get by param key in case of multi param
-                data={getParamsOptions(props.selectedActivityName!, props.encyclopedia)}
-                value={value}
-                onChange={(v) => onChangeContext(key, v)}
-              />
-            );
-          })}
-        </div>
-      )}
-    </div>
+      {props.selectedActivityParams &&
+        Object.entries(props.selectedActivityParams).map(([key, value]) => (
+          <Select
+            key={key}
+            label={key}
+            searchable
+            // todo: usememo and get by param key in case of multi param
+            data={getParamsOptions(props.selectedActivityName!, props.encyclopedia)}
+            value={value}
+            onChange={(v) => onChangeContext(key, v)}
+          />
+        ))}
+      <Button onClick={props.onUpdateClick} disabled={!props.selectedActivityName || !props.selectedActivityParams}>
+        Update Activity
+      </Button>
+    </Stack>
   );
 };

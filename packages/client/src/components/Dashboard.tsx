@@ -1,4 +1,4 @@
-import { Button, Container, Flex, Loader, Stack, Text } from "@mantine/core";
+import { Button, Container, Flex, Group, Loader, Stack, Text } from "@mantine/core";
 import { CharacterInfo } from "@artifacts/shared";
 import {
   useClearAllMutation,
@@ -44,14 +44,17 @@ export const Dashboard = (props: DashboardProps) => {
   }
 
   return (
-    <Container>
+    <Container py="md">
       <Stack>
-        <Flex gap="md">
+        <Flex justify="space-between">
+          <Group gap="md">
+            <Button onClick={clearAll} color="red">
+              Stop All
+            </Button>
+            <Button color="green">Start All Default</Button>
+          </Group>
           <Button onClick={props.clearToken} color="yellow">
-            Clear Token
-          </Button>
-          <Button onClick={clearAll} color="red">
-            Stop All
+            Logout
           </Button>
         </Flex>
         {characterQuery.data.map((character) => (
