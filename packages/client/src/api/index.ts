@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CharacterInfo, Encyclopedia } from "@artifacts/shared";
+import { CharacterInfo, CharacterInfoResponse, Encyclopedia } from "@artifacts/shared";
 import { serverUrl } from "../config";
 
 const fetcher = async <T>(path: string, token: string, method: "GET" | "POST" = "GET", body?: BodyInit): Promise<T> => {
@@ -25,8 +25,8 @@ export const useGetEncyclopediaQuery = (token: string) =>
 export const useGetDashboardDataQuery = (token: string) =>
   useQuery({
     queryKey: ["characters"],
-    queryFn: () => fetcher<CharacterInfo[]>("/characters", token),
-    refetchInterval: 15000,
+    queryFn: () => fetcher<CharacterInfoResponse>("/characters", token),
+    refetchInterval: 20000,
     retry: false,
   });
 
@@ -35,7 +35,7 @@ export const useUpdateActivityMutation = () => {
 
   return useMutation({
     mutationFn: ({ token, characterInfo }: { token: string; characterInfo: CharacterInfo }) =>
-      fetcher<CharacterInfo[]>("/update", token, "POST", JSON.stringify(characterInfo)),
+      fetcher<CharacterInfoResponse>("/update", token, "POST", JSON.stringify(characterInfo)),
     onSuccess: (data) => {
       queryClient.setQueryData(["characters"], data);
     },

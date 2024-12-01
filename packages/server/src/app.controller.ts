@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Inject, Post } from "@nestjs/common";
 import { AppService } from "./app.service";
-import { CharacterInfo, Encyclopedia } from "@artifacts/shared";
+import { CharacterInfo, CharacterInfoResponse, Encyclopedia } from "@artifacts/shared";
 import { InitialData } from "./services/artifactsApi.service";
 
 @Controller()
@@ -16,8 +16,8 @@ export class AppController {
   }
 
   @Get("characters")
-  getCharacters(): CharacterInfo[] {
-    return this.appService.getAllCharacterInfo();
+  async getCharacters(): Promise<CharacterInfoResponse> {
+    return await this.appService.getAllCharacterInfo();
   }
 
   @Post("update")
@@ -30,8 +30,8 @@ export class AppController {
   }
 
   @Post("clear-all")
-  clearAll(): CharacterInfo[] {
+  async clearAll(): Promise<CharacterInfoResponse> {
     this.appService.clearAll();
-    return this.appService.getAllCharacterInfo();
+    return await this.appService.getAllCharacterInfo();
   }
 }

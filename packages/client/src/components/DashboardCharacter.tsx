@@ -1,11 +1,19 @@
 import { useState } from "react";
-import { Activity, ActivityName, ActivityParams, CharacterInfo, Encyclopedia } from "@artifacts/shared";
+import {
+  Activity,
+  ActivityName,
+  ActivityParams,
+  CharacterInfo,
+  CharacterInfoResponse,
+  Encyclopedia,
+} from "@artifacts/shared";
 import { Button, Flex, Group, Image, Paper, Text } from "@mantine/core";
 import { ActivitySelector } from "./ActivitySelector";
 import styles from "./DashboardCharacter.module.css";
+import { CharacterStats } from "./CharacterStats";
 
 interface DashboardCharacterProps {
-  character: CharacterInfo;
+  character: CharacterInfoResponse[0];
   encyclopedia: Encyclopedia;
   update: (info: CharacterInfo) => void;
 }
@@ -44,14 +52,19 @@ export const DashboardCharacter = ({ character, update, encyclopedia }: Dashboar
     <Paper p="sm" className={`${styles.container} ${isActive ? styles.active : styles.inactive}`}>
       <Flex justify="center" direction="column" style={{ textAlign: "center" }}>
         <Flex justify="center" align="center" gap="sm">
-          <Image mah={50} w="auto" fit="contain" src="https://artifactsmmo.com/images/characters/men1.png" />
+          <Image
+            mah={50}
+            w="auto"
+            fit="contain"
+            src={`https://artifactsmmo.com/images/characters/${character.skin}.png`}
+          />
           <Text size="xl" fw="bold">
             {character.characterName}
           </Text>
         </Flex>
-        {character.error && <Text>Error: {character.error}</Text>}
+        <CharacterStats character={character} />
         <Text>Default Activity: none</Text>
-        <Text>Stats: ...</Text>
+        {character.error && <Text>Error: {character.error}</Text>}
       </Flex>
 
       <Flex direction="column" gap="sm" pb="sm">

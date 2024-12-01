@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger, OnModuleInit } from "@nestjs/common";
-import { CharacterInfo } from "@artifacts/shared";
+import { CharacterInfo, CharacterInfoResponse } from "@artifacts/shared";
 import { Queue } from "./queue/queue";
 import { CharacterActivityService } from "./services/characterActivity.service";
 import { ArtifactsApiService, InitialData } from "./services/artifactsApi.service";
@@ -31,8 +31,15 @@ export class AppService implements OnModuleInit {
     });
   }
 
-  getAllCharacterInfo(): CharacterInfo[] {
-    return [...this.ctxMap.values()].map(({ characterName, activity, error }) => ({ characterName, activity, error }));
+  async getAllCharacterInfo(): Promise<CharacterInfoResponse> {
+    // TODO should keep this updated using a queue callback
+    const characters = await this.client.getCharacters();
+    return [...this.ctxMap.values()].map(({ characterName, activity, error }) => ({
+      characterName,
+      activity,
+      error,
+      ...characters.find((x) => x.name === characterName),
+    }));
   }
 
   async update(info: CharacterInfo, updateDb: boolean = true): Promise<void> {
