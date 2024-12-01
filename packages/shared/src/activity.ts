@@ -6,6 +6,7 @@ export interface BaseContext {
 
 export interface GatherContext extends BaseContext {
   gatherSquare: Destination;
+  bankSquare: Destination;
 }
 export interface GatherParams {
   squareCode: string;
@@ -17,6 +18,7 @@ export interface FightParams {
 
 export interface FightContext extends BaseContext {
   monsterSquare: Destination;
+  bankSquare: Destination;
 }
 
 export interface CraftContext extends BaseContext {

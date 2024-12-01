@@ -77,7 +77,7 @@ export class Queue {
       }
 
       this.concurrencyCheck();
-      this.logger.log(`executing ${nextItem?.action.type}, ${nextItem?.action.payload}`);
+      this.logger.log(`executing ${nextItem?.action.type}, ${JSON.stringify(nextItem?.action.payload)}`);
       const result = await this.client.doIt(this.info.characterName, nextItem.action);
       //const result = await nextItem.action(this.info.characterName, nextItem.payload);
 

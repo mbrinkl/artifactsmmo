@@ -1,5 +1,6 @@
-import { ActionResultData, coords, CraftContext, CraftParams, Encyclopedia } from "@artifacts/shared";
+import { ActionResultData, CraftContext, CraftParams, Encyclopedia } from "@artifacts/shared";
 import { QueueItem } from "./queue";
+import { depositAll, getClosestToCharacter } from "./loopUtil";
 
 export const getCraftContext = (encyclopedia: Encyclopedia, params: CraftParams): CraftContext => {
   const productItem = encyclopedia.items.find((x) => x.code === params.productCode);
@@ -26,40 +27,34 @@ export const getCraftContext = (encyclopedia: Encyclopedia, params: CraftParams)
 };
 
 export const craftQueueBuilder = (res: ActionResultData | null, ctx: CraftContext): QueueItem<CraftContext>[] => {
-  if (!res || !res.character.inventory) return [];
-
   const max = res.character.inventory_max_items;
-  const total = res.character.inventory.reduce((a, b) => a + b.quantity, 0);
-  const space = max - total;
+  const totalQuantityPerCraft = ctx.sourceItems.reduce((sum, item) => sum + item.quantity, 0);
+  const sourceItemsInInv = res.character.inventory.filter((x) => ctx.sourceItems.map((y) => y.code).includes(x.code));
+  const craftQuantityPerSourceItem = sourceItemsInInv.map((x) => {
+    const sourceItem = ctx.sourceItems.find((y) => y.code === x.code);
+    return Math.floor(x.quantity / sourceItem.quantity);
+  });
+  const craftQuantity = craftQuantityPerSourceItem.length > 0 ? Math.min(...craftQuantityPerSourceItem) : 0;
 
-  // if sufficient materials in inv to craft product, craft
-  // TODO: just assuming single source items for now
-  const sourceItemInInv = res.character.inventory.find((x) => x.code === ctx.sourceItems[0].code);
-
-  if (!sourceItemInInv || sourceItemInInv.quantity < ctx.sourceItems[0].quantity) {
-    const depositNonSourceItems: QueueItem[] = res.character.inventory
-      .filter((x) => x.quantity > 0 && x.code !== ctx.sourceItems[0].code)
-      .map(({ code, quantity }) => ({
-        action: { type: "deposit", payload: { code, quantity } },
-      }));
+  if (craftQuantity === 0) {
+    const withdrawSourceItems: QueueItem[] = ctx.sourceItems.map((item, index) => {
+      const quantity = Math.floor(max / totalQuantityPerCraft) * item.quantity;
+      return {
+        action: { type: "withdraw", payload: { code: item.code, quantity } },
+        onExecuted: index === ctx.sourceItems.length - 1 ? craftQueueBuilder : undefined,
+      };
+    });
 
     return [
-      { action: { type: "move", payload: coords["Bank"] } },
-      ...depositNonSourceItems,
-
-      // TODO: only withdraws the amount of space before deposit
-      {
-        action: { type: "withdraw", payload: { code: ctx.sourceItems[0].code, quantity: space } },
-        onExecuted: craftQueueBuilder,
-      },
+      { action: { type: "move", payload: getClosestToCharacter("bank", res.character, ctx.encyclopedia) } },
+      ...depositAll(res.character),
+      ...withdrawSourceItems,
     ];
   }
 
   if (res.character.x !== ctx.craftSquare.x || res.character.y !== ctx.craftSquare.y) {
     return [{ action: { type: "move", payload: ctx.craftSquare }, onExecuted: craftQueueBuilder }];
   }
-
-  const craftQuantity = Math.floor(sourceItemInInv.quantity / ctx.sourceItems[0].quantity);
 
   return [
     {

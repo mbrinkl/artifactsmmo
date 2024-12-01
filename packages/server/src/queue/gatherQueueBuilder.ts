@@ -1,15 +1,10 @@
 import { ActionResultData, Encyclopedia, GatherContext, GatherParams } from "@artifacts/shared";
 import { QueueItem } from "./queue";
-import { depositAll, getClosest, getInventoryNumItems } from "./loopUtil";
+import { depositAll, getClosestPair, getInventoryNumItems } from "./loopUtil";
 
 export const getGatherContext = (encyclopedia: Encyclopedia, params: GatherParams): GatherContext => {
-  // should do a getClosest to a bank, not to current character
-  // maybe also store bank location in context instead of recalculating?
-  const gatherSquare = encyclopedia.squares.find((x) => x.content?.code === params.squareCode);
-  if (!gatherSquare) {
-    throw new Error("Square not found: " + params.squareCode);
-  }
-  return { encyclopedia, gatherSquare };
+  const [gatherSquare, bankSquare] = getClosestPair(params.squareCode, "bank", encyclopedia);
+  return { encyclopedia, gatherSquare, bankSquare };
 };
 
 export const gatherQueueBuilder = ({ character }: ActionResultData, ctx: GatherContext): QueueItem<GatherContext>[] => {
@@ -17,7 +12,7 @@ export const gatherQueueBuilder = ({ character }: ActionResultData, ctx: GatherC
 
   if (inventoryNumItems === character.inventory_max_items) {
     return [
-      { action: { type: "move", payload: getClosest("bank", character, ctx.encyclopedia) } },
+      { action: { type: "move", payload: ctx.bankSquare } },
       ...depositAll(character),
       { action: { type: "move", payload: ctx.gatherSquare }, onExecuted: gatherQueueBuilder },
     ];

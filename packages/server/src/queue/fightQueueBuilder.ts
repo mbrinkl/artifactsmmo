@@ -1,13 +1,10 @@
 import { ActionResultData, Encyclopedia, FightContext, FightParams } from "@artifacts/shared";
 import { QueueItem } from "./queue";
-import { depositAll, getClosest, getInventoryNumItems } from "./loopUtil";
+import { depositAll, getClosestPair, getInventoryNumItems } from "./loopUtil";
 
 export const getFightContext = (encyclopedia: Encyclopedia, params: FightParams): FightContext => {
-  const monsterSquare = encyclopedia.squares.find((x) => x.content?.code === params.monsterCode);
-  if (!monsterSquare) {
-    throw new Error("Square not found: " + params.monsterCode);
-  }
-  return { encyclopedia, monsterSquare };
+  const [monsterSquare, bankSquare] = getClosestPair(params.monsterCode, "bank", encyclopedia);
+  return { encyclopedia, monsterSquare, bankSquare };
 };
 
 export const fightQueueBuilder = ({ character }: ActionResultData, ctx: FightContext): QueueItem<FightContext>[] => {
@@ -15,7 +12,7 @@ export const fightQueueBuilder = ({ character }: ActionResultData, ctx: FightCon
 
   if (inventoryNumItems === character.inventory_max_items) {
     return [
-      { action: { type: "move", payload: getClosest("bank", character, ctx.encyclopedia) } },
+      { action: { type: "move", payload: ctx.bankSquare } },
       ...depositAll(character),
       { action: { type: "move", payload: ctx.monsterSquare }, onExecuted: fightQueueBuilder },
     ];
