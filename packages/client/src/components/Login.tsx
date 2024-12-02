@@ -11,8 +11,6 @@ export const Login = (props: LoginProps) => {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (value) {
-      console.log("GOT VALUE", value, "asdf");
-      console.log(value);
       props.onLogin(value);
     }
   };
