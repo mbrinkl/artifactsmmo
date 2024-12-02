@@ -9,18 +9,17 @@ import {
 } from "@artifacts/shared";
 import { Button, Flex, Group, Image, Paper, Text } from "@mantine/core";
 import { ActivitySelector } from "./ActivitySelector";
-import styles from "./DashboardCharacter.module.css";
 import { CharacterStats } from "./CharacterStats";
 import { useUpdateDefaultActivityMutation } from "../api";
+import styles from "./DashboardCharacter.module.css";
 
 interface DashboardCharacterProps {
-  token: string;
   character: CharacterInfoResponse[0];
   encyclopedia: Encyclopedia;
   update: (info: CharacterInfo) => void;
 }
 
-export const DashboardCharacter = ({ character, update, encyclopedia, ...props }: DashboardCharacterProps) => {
+export const DashboardCharacter = ({ character, update, encyclopedia }: DashboardCharacterProps) => {
   const [selectedActivityName, setSelectedActivityName] = useState<ActivityName | null>(null);
   const [selectedActivityParams, setSelectedActivityParams] = useState<ActivityParams | null>(null);
 
@@ -39,7 +38,6 @@ export const DashboardCharacter = ({ character, update, encyclopedia, ...props }
     if (!selectedActivityName || !selectedActivityParams) return;
     // todo, check context values are set
     updateDefaultActivityMutation.mutate({
-      token: props.token,
       body: {
         characterName: character.characterName,
         activity: { name: selectedActivityName, params: selectedActivityParams } as Activity,

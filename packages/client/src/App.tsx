@@ -1,24 +1,28 @@
-import { useState } from "react";
+import { useLocalStorage } from "@mantine/hooks";
 import { tokenStorageKey } from "./config";
 import { Login } from "./components/Login";
 import { Dashboard } from "./components/Dashboard";
+import { Button, Container, Flex } from "@mantine/core";
 
 export const App = () => {
-  const [token, setToken] = useState(localStorage.getItem(tokenStorageKey));
-
-  const updateToken = (value: string) => {
-    localStorage.setItem(tokenStorageKey, value);
-    setToken(value);
-  };
-
-  const clearToken = () => {
-    localStorage.removeItem(tokenStorageKey);
-    setToken(null);
-  };
+  const [token, setToken, clearToken] = useLocalStorage({
+    key: tokenStorageKey,
+    serialize: (v) => v,
+    deserialize: (v) => v ?? "",
+  });
 
   if (!token) {
-    return <Login updateToken={updateToken} />;
+    return <Login onLogin={setToken} />;
   }
 
-  return <Dashboard token={token} clearToken={clearToken} />;
+  return (
+    <Container py="md">
+      <Flex justify="end">
+        <Button onClick={clearToken} variant="outline" color="red">
+          Logout
+        </Button>
+      </Flex>
+      <Dashboard />
+    </Container>
+  );
 };

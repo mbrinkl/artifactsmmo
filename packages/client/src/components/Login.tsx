@@ -2,7 +2,7 @@ import { Button, Center, Container, Input, Stack } from "@mantine/core";
 import { useState } from "react";
 
 interface LoginProps {
-  updateToken: (value: string) => void;
+  onLogin: (value: string) => void;
 }
 
 export const Login = (props: LoginProps) => {
@@ -11,7 +11,9 @@ export const Login = (props: LoginProps) => {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (value) {
-      props.updateToken(value);
+      console.log("GOT VALUE", value, "asdf");
+      console.log(value);
+      props.onLogin(value);
     }
   };
 

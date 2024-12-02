@@ -1,4 +1,4 @@
-import { Button, Container, Flex, Group, Loader, Stack, Text } from "@mantine/core";
+import { Button, Flex, Loader, Stack, Text } from "@mantine/core";
 import { CharacterInfo } from "@artifacts/shared";
 import {
   useClearAllMutation,
@@ -9,28 +9,23 @@ import {
 } from "../api";
 import { DashboardCharacter } from "./DashboardCharacter";
 
-interface DashboardProps {
-  token: string;
-  clearToken: () => void;
-}
-
-export const Dashboard = (props: DashboardProps) => {
-  const characterQuery = useGetDashboardDataQuery(props.token);
-  const encyclopediaQuery = useGetEncyclopediaQuery(props.token);
+export const Dashboard = () => {
+  const characterQuery = useGetDashboardDataQuery();
+  const encyclopediaQuery = useGetEncyclopediaQuery();
   const updateActivityMutation = useUpdateActivityMutation();
   const clearAllMutation = useClearAllMutation();
   const setAllDefaultMutation = useSetAllDefaultMutation();
 
   const update = (characterInfo: CharacterInfo) => {
-    updateActivityMutation.mutate({ token: props.token, characterInfo });
+    updateActivityMutation.mutate({ characterInfo });
   };
 
   const setAllDefault = () => {
-    setAllDefaultMutation.mutate({ token: props.token });
+    setAllDefaultMutation.mutate();
   };
 
   const clearAll = () => {
-    clearAllMutation.mutate({ token: props.token });
+    clearAllMutation.mutate();
   };
 
   if (characterQuery.error || encyclopediaQuery.error) {
@@ -46,35 +41,27 @@ export const Dashboard = (props: DashboardProps) => {
   }
 
   if (characterQuery.data.length === 0) {
-    return <Text>No characters in response</Text>;
+    return <Text>No characters found.</Text>;
   }
 
   return (
-    <Container py="md">
-      <Stack>
-        <Flex justify="space-between">
-          <Group gap="md">
-            <Button onClick={clearAll} color="red">
-              Stop All
-            </Button>
-            <Button onClick={setAllDefault} color="green">
-              Start All Default
-            </Button>
-          </Group>
-          <Button onClick={props.clearToken} color="yellow">
-            Logout
-          </Button>
-        </Flex>
-        {characterQuery.data.map((character) => (
-          <DashboardCharacter
-            key={character.characterName}
-            token={props.token}
-            character={character}
-            encyclopedia={encyclopediaQuery.data}
-            update={update}
-          />
-        ))}
-      </Stack>
-    </Container>
+    <Stack>
+      <Flex gap="md">
+        <Button onClick={clearAll} color="red">
+          Stop All
+        </Button>
+        <Button onClick={setAllDefault} color="green">
+          Start All Default
+        </Button>
+      </Flex>
+      {characterQuery.data.map((character) => (
+        <DashboardCharacter
+          key={character.characterName}
+          character={character}
+          encyclopedia={encyclopediaQuery.data}
+          update={update}
+        />
+      ))}
+    </Stack>
   );
 };
