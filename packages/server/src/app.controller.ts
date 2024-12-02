@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Inject, Post } from "@nestjs/common";
 import { AppService } from "./app.service";
-import { CharacterInfo, CharacterInfoResponse, Encyclopedia } from "@artifacts/shared";
+import { Activity, CharacterInfo, CharacterInfoResponse, Encyclopedia } from "@artifacts/shared";
 import { InitialData } from "./services/artifactsApi.service";
 
 @Controller()
@@ -32,6 +32,17 @@ export class AppController {
   @Post("clear-all")
   async clearAll(): Promise<CharacterInfoResponse> {
     this.appService.clearAll();
+    return await this.appService.getAllCharacterInfo();
+  }
+
+  @Post("update-default-activity")
+  async updateDefaultActivity(@Body() body: { characterName: string; activity: Activity }): Promise<void> {
+    await this.appService.updateDefaultActivity(body.characterName, body.activity);
+  }
+
+  @Post("set-all-default")
+  async setAllDefault(): Promise<CharacterInfoResponse> {
+    this.appService.setAllDefault();
     return await this.appService.getAllCharacterInfo();
   }
 }

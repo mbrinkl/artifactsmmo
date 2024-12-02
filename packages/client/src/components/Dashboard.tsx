@@ -4,6 +4,7 @@ import {
   useClearAllMutation,
   useGetDashboardDataQuery,
   useGetEncyclopediaQuery,
+  useSetAllDefaultMutation,
   useUpdateActivityMutation,
 } from "../api";
 import { DashboardCharacter } from "./DashboardCharacter";
@@ -18,9 +19,14 @@ export const Dashboard = (props: DashboardProps) => {
   const encyclopediaQuery = useGetEncyclopediaQuery(props.token);
   const updateActivityMutation = useUpdateActivityMutation();
   const clearAllMutation = useClearAllMutation();
+  const setAllDefaultMutation = useSetAllDefaultMutation();
 
   const update = (characterInfo: CharacterInfo) => {
     updateActivityMutation.mutate({ token: props.token, characterInfo });
+  };
+
+  const setAllDefault = () => {
+    setAllDefaultMutation.mutate({ token: props.token });
   };
 
   const clearAll = () => {
@@ -51,7 +57,9 @@ export const Dashboard = (props: DashboardProps) => {
             <Button onClick={clearAll} color="red">
               Stop All
             </Button>
-            <Button color="green">Start All Default</Button>
+            <Button onClick={setAllDefault} color="green">
+              Start All Default
+            </Button>
           </Group>
           <Button onClick={props.clearToken} color="yellow">
             Logout
@@ -60,6 +68,7 @@ export const Dashboard = (props: DashboardProps) => {
         {characterQuery.data.map((character) => (
           <DashboardCharacter
             key={character.characterName}
+            token={props.token}
             character={character}
             encyclopedia={encyclopediaQuery.data}
             update={update}

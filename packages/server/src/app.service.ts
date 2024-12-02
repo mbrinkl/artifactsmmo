@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger, OnModuleInit } from "@nestjs/common";
-import { CharacterInfo, CharacterInfoResponse } from "@artifacts/shared";
+import { Activity, CharacterInfo, CharacterInfoResponse } from "@artifacts/shared";
 import { Queue } from "./queue/queue";
 import { CharacterActivityService } from "./services/characterActivity.service";
 import { ArtifactsApiService, InitialData } from "./services/artifactsApi.service";
@@ -23,7 +23,7 @@ export class AppService implements OnModuleInit {
     const storedCharacterInfo = await this.characterActivityService.findAll();
     this.data.characterNames.forEach((characterName) => {
       const stored = storedCharacterInfo.find((x) => x.characterName === characterName);
-      const characterInfo = stored ?? { characterName, activity: null };
+      const characterInfo = stored ?? { characterName, activity: null, defaultActivity: null };
       this.ctxMap.set(characterInfo.characterName, {
         ...characterInfo,
         q: new Queue(characterInfo, this.data.encyclopedia, this.onQueueError.bind(this), this.client),
@@ -34,9 +34,10 @@ export class AppService implements OnModuleInit {
   async getAllCharacterInfo(): Promise<CharacterInfoResponse> {
     // TODO should keep this updated using a queue callback
     const characters = await this.client.getCharacters();
-    return [...this.ctxMap.values()].map(({ characterName, activity, error }) => ({
+    return [...this.ctxMap.values()].map(({ characterName, defaultActivity, activity, error }) => ({
       characterName,
       activity,
+      defaultActivity,
       error,
       ...characters.find((x) => x.name === characterName),
     }));
@@ -70,8 +71,44 @@ export class AppService implements OnModuleInit {
       if (value.q) {
         value.q.abort();
       }
-      map.set(key, { characterName: value.characterName, activity: null });
-      await this.characterActivityService.upsert({ characterName: value.characterName, activity: null });
+      const ctx = this.ctxMap.get(key);
+      ctx.activity = null;
+      ctx.error = undefined;
+      map.set(key, ctx);
+      await this.characterActivityService.upsert(ctx);
+    });
+  }
+
+  async updateDefaultActivity(characterName: string, activity: Activity) {
+    const ctx = this.ctxMap.get(characterName);
+    ctx.defaultActivity = activity;
+    await this.characterActivityService.upsert(ctx);
+  }
+
+  setAllDefault() {
+    this.ctxMap.forEach(async (value, key, map) => {
+      if (!value.defaultActivity) {
+        return;
+      }
+      if (value.activity && JSON.stringify(value.defaultActivity) === JSON.stringify(value.activity)) {
+        return;
+      }
+
+      if (value.q) {
+        value.q.abort();
+      }
+
+      map.set(key, {
+        characterName: value.characterName,
+        activity: value.defaultActivity,
+        defaultActivity: value.defaultActivity,
+      });
+
+      await this.characterActivityService.upsert({
+        characterName: value.characterName,
+        activity: value.defaultActivity,
+        defaultActivity: value.defaultActivity,
+      });
     });
   }
 
@@ -80,7 +117,10 @@ export class AppService implements OnModuleInit {
       this.logger.error("Invalid character name in onQueueError: " + characterName);
       return;
     }
-    this.ctxMap.set(characterName, { characterName, activity: null, error });
-    this.characterActivityService.upsert({ characterName, activity: null, error });
+    const ctx = this.ctxMap.get(characterName);
+    ctx.error = error;
+    ctx.activity = null;
+    this.ctxMap.set(characterName, ctx);
+    this.characterActivityService.upsert(ctx);
   }
 }

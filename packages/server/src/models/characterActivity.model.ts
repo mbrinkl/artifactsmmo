@@ -9,6 +9,12 @@ export class CharacterActivity {
   name: string;
 
   @Column({ nullable: true })
+  defaultActivityName: string | null;
+
+  @Column({ nullable: true })
+  defaultActivityParams: string | null;
+
+  @Column({ nullable: true })
   activityName: string | null;
 
   @Column({ nullable: true })

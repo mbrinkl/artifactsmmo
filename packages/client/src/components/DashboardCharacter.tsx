@@ -11,16 +11,20 @@ import { Button, Flex, Group, Image, Paper, Text } from "@mantine/core";
 import { ActivitySelector } from "./ActivitySelector";
 import styles from "./DashboardCharacter.module.css";
 import { CharacterStats } from "./CharacterStats";
+import { useUpdateDefaultActivityMutation } from "../api";
 
 interface DashboardCharacterProps {
+  token: string;
   character: CharacterInfoResponse[0];
   encyclopedia: Encyclopedia;
   update: (info: CharacterInfo) => void;
 }
 
-export const DashboardCharacter = ({ character, update, encyclopedia }: DashboardCharacterProps) => {
+export const DashboardCharacter = ({ character, update, encyclopedia, ...props }: DashboardCharacterProps) => {
   const [selectedActivityName, setSelectedActivityName] = useState<ActivityName | null>(null);
   const [selectedActivityParams, setSelectedActivityParams] = useState<ActivityParams | null>(null);
+
+  const updateDefaultActivityMutation = useUpdateDefaultActivityMutation();
 
   const updateActivity = () => {
     if (!selectedActivityName || !selectedActivityParams) return;
@@ -28,6 +32,18 @@ export const DashboardCharacter = ({ character, update, encyclopedia }: Dashboar
     update({
       characterName: character.characterName,
       activity: { name: selectedActivityName, params: selectedActivityParams } as Activity,
+    });
+  };
+
+  const updateDefaultActivity = () => {
+    if (!selectedActivityName || !selectedActivityParams) return;
+    // todo, check context values are set
+    updateDefaultActivityMutation.mutate({
+      token: props.token,
+      body: {
+        characterName: character.characterName,
+        activity: { name: selectedActivityName, params: selectedActivityParams } as Activity,
+      },
     });
   };
 
@@ -63,7 +79,7 @@ export const DashboardCharacter = ({ character, update, encyclopedia }: Dashboar
           </Text>
         </Flex>
         <CharacterStats character={character} />
-        <Text>Default Activity: none</Text>
+        <Text>Default Activity: {getFormattedActivity(character.defaultActivity ?? null)}</Text>
         {character.error && <Text>Error: {character.error}</Text>}
       </Flex>
 
@@ -73,7 +89,9 @@ export const DashboardCharacter = ({ character, update, encyclopedia }: Dashboar
           <Button onClick={clearActivity} disabled={!isActive} color="red">
             Stop
           </Button>
-          <Button disabled={!isActive}>Set as Default</Button>
+          <Button onClick={updateDefaultActivity} disabled={!isActive}>
+            Set as Default
+          </Button>
         </Group>
       </Flex>
 
