@@ -7,7 +7,7 @@ import {
   CharacterInfoResponse,
   Encyclopedia,
 } from "@artifacts/shared";
-import { Button, Flex, Group, Image, Paper, Text } from "@mantine/core";
+import { Button, Divider, Flex, Group, Image, Paper, Text } from "@mantine/core";
 import { ActivitySelector } from "./ActivitySelector";
 import { CharacterStats } from "./CharacterStats";
 import { useUpdateDefaultActivityMutation } from "../api";
@@ -64,24 +64,25 @@ export const DashboardCharacter = ({ character, update, encyclopedia }: Dashboar
 
   return (
     <Paper p="sm" className={`${styles.container} ${isActive ? styles.active : styles.inactive}`}>
-      <Flex justify="center" direction="column" style={{ textAlign: "center" }}>
-        <Flex justify="center" align="center" gap="sm">
-          <Image
-            mah={50}
-            w="auto"
-            fit="contain"
-            src={`https://artifactsmmo.com/images/characters/${character.skin}.png`}
-          />
-          <Text size="xl" fw="bold">
-            {character.characterName}
-          </Text>
-        </Flex>
-        <CharacterStats character={character} />
-        <Text>Default Activity: {getFormattedActivity(character.defaultActivity ?? null)}</Text>
-        {character.error && <Text>Error: {character.error}</Text>}
+      <Flex justify="center" align="center" gap="sm">
+        <Image
+          mah={50}
+          w="auto"
+          fit="contain"
+          src={`https://artifactsmmo.com/images/characters/${character.skin}.png`}
+        />
+        <Text size="xl" fw="bold">
+          {character.characterName}
+        </Text>
       </Flex>
 
-      <Flex direction="column" gap="sm" pb="sm">
+      <CharacterStats character={character} />
+
+      <Divider my="md" />
+
+      <Flex align="center" direction="column" gap="sm">
+        <Text>Default Activity: {getFormattedActivity(character.defaultActivity ?? null)}</Text>
+        {character.error && <Text>Error: {character.error}</Text>}
         <Text size="md">Current Activity: {getFormattedActivity(character.activity)}</Text>
         <Group gap="sm">
           <Button onClick={clearActivity} disabled={!isActive} color="red">
@@ -92,6 +93,8 @@ export const DashboardCharacter = ({ character, update, encyclopedia }: Dashboar
           </Button>
         </Group>
       </Flex>
+
+      <Divider my="md" />
 
       <ActivitySelector
         selectedActivityName={selectedActivityName}

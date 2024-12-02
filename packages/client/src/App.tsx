@@ -8,7 +8,6 @@ export const App = () => {
   const [token, setToken, clearToken] = useLocalStorage({
     key: tokenStorageKey,
     serialize: (v) => v,
-    deserialize: (v) => v ?? "",
   });
 
   if (!token) {
