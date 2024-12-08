@@ -18,14 +18,8 @@ export interface InitialData {
 }
 
 export type QueueAction =
-  | {
-      type: "move";
-      payload: Destination;
-    }
-  | {
-      type: "craft";
-      payload: Drop;
-    }
+  | { type: "move"; payload: Destination }
+  | { type: "craft"; payload: Drop }
   | { type: "fight"; payload?: never }
   | { type: "gather"; payload?: never }
   | { type: "deposit"; payload: Drop }
@@ -38,14 +32,10 @@ export class ArtifactsApiService {
   private logger = new Logger(ArtifactsApiService.name);
 
   constructor() {
-    const authToken = process.env.auth_token;
-    if (!authToken) {
-      throw new Error("Auth token not set in environment variables");
-    }
     this.client = createClient<paths>({
       baseUrl: "https://api.artifactsmmo.com",
       headers: {
-        Authorization: "Bearer " + authToken,
+        Authorization: "Bearer " + process.env.auth_token,
         Accept: "application/json",
         "Content-Type": "application/json",
       },

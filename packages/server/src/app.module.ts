@@ -5,15 +5,15 @@ import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { CharacterActivity } from "./models/characterActivity.model";
 import { AuthGuard } from "./guards/auth.guard";
-import { CharacterActivityService } from "./services/characterActivity.service";
+import { CharacterActivityRepository } from "./services/characterActivity.repository";
 import { APP_GUARD } from "@nestjs/core";
 import { ArtifactsApiService } from "./services/artifactsApi.service";
 import { InitialDataProvider } from "./providers/initialData.provider";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { SocketClientService } from "./services/socketClient.service";
 
-const getDbFilePath = (envPath: string | undefined) => {
-  let dbPath = envPath || "";
+const getDbFilePath = () => {
+  let dbPath = process.env.db_path;
   if (dbPath && !dbPath.endsWith("/")) {
     dbPath += "/";
   }
@@ -36,7 +36,7 @@ const getDbFilePath = (envPath: string | undefined) => {
         ]),
     TypeOrmModule.forRoot({
       type: "sqlite",
-      database: getDbFilePath(process.env.db_path),
+      database: getDbFilePath(),
       entities: [CharacterActivity],
       synchronize: true,
     }),
@@ -46,7 +46,7 @@ const getDbFilePath = (envPath: string | undefined) => {
   providers: [
     AppService,
     ArtifactsApiService,
-    CharacterActivityService,
+    CharacterActivityRepository,
     SocketClientService,
     InitialDataProvider,
     {

@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { Activity, CharacterInfo, CharacterInfoResponse } from "@artifacts/shared";
 import { Queue } from "./queue/queue";
-import { CharacterActivityService } from "./services/characterActivity.service";
+import { CharacterActivityRepository } from "./services/characterActivity.repository";
 import { ArtifactsApiService, InitialData } from "./services/artifactsApi.service";
 
 export interface CharacterContext extends CharacterInfo {
@@ -14,13 +14,13 @@ export class AppService implements OnModuleInit {
   private ctxMap: Map<string, CharacterContext> = new Map();
 
   constructor(
-    private readonly characterActivityService: CharacterActivityService,
+    private readonly characterActivityRepository: CharacterActivityRepository,
     private readonly client: ArtifactsApiService,
     @Inject("INITIAL_DATA") private readonly data: InitialData,
   ) {}
 
   async onModuleInit() {
-    const storedCharacterInfo = await this.characterActivityService.findAll();
+    const storedCharacterInfo = await this.characterActivityRepository.findAll();
     this.data.characterNames.forEach((characterName) => {
       const stored = storedCharacterInfo.find((x) => x.characterName === characterName);
       const characterInfo = stored ?? { characterName, activity: null, defaultActivity: null };
@@ -58,7 +58,7 @@ export class AppService implements OnModuleInit {
     ctx.error = undefined;
 
     if (updateDb) {
-      await this.characterActivityService.upsert(info);
+      await this.characterActivityRepository.upsert(info);
     }
 
     if (ctx.activity !== null) {
@@ -75,14 +75,14 @@ export class AppService implements OnModuleInit {
       ctx.activity = null;
       ctx.error = undefined;
       map.set(key, ctx);
-      await this.characterActivityService.upsert(ctx);
+      await this.characterActivityRepository.upsert(ctx);
     });
   }
 
   async updateDefaultActivity(characterName: string, activity: Activity) {
     const ctx = this.ctxMap.get(characterName);
     ctx.defaultActivity = activity;
-    await this.characterActivityService.upsert(ctx);
+    await this.characterActivityRepository.upsert(ctx);
   }
 
   setAllDefault() {
@@ -104,7 +104,7 @@ export class AppService implements OnModuleInit {
         defaultActivity: value.defaultActivity,
       });
 
-      await this.characterActivityService.upsert({
+      await this.characterActivityRepository.upsert({
         characterName: value.characterName,
         activity: value.defaultActivity,
         defaultActivity: value.defaultActivity,
@@ -121,6 +121,6 @@ export class AppService implements OnModuleInit {
     ctx.error = error;
     ctx.activity = null;
     this.ctxMap.set(characterName, ctx);
-    this.characterActivityService.upsert(ctx);
+    this.characterActivityRepository.upsert(ctx);
   }
 }
