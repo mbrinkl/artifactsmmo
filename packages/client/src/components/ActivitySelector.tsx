@@ -28,6 +28,7 @@ export const ActivitySelector = (props: ActivitySelectorProps) => {
         label="Activity"
         data={activityNames}
         value={props.selectedActivityName}
+        size="md"
         searchable
         onChange={(v) => onChangeActivityName(v as ActivityName)}
       />
@@ -37,6 +38,7 @@ export const ActivitySelector = (props: ActivitySelectorProps) => {
             key={key}
             label={key}
             searchable
+            size="md"
             // todo: usememo and get by param key in case of multi param
             data={getParamsOptions(props.selectedActivityName!, props.encyclopedia)}
             value={value}
