@@ -50,6 +50,7 @@ export class Queue {
     }
 
     try {
+      throw new Error("idiot lmao");
       this.concurrencyCheck();
       [this.queue, this.activityCtx] = initialQueueFactory(
         initialCharacterState,
@@ -112,7 +113,7 @@ export class Queue {
     }
     this.logger.error(err);
     this.queue = [];
-    this.onError(this.info.characterName, err.message);
+    this.onError(this.info.characterName, JSON.stringify(err, Object.getOwnPropertyNames(err)));
   }
 
   private concurrencyCheck() {

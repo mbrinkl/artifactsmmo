@@ -81,8 +81,8 @@ export const DashboardCharacter = ({ character, encyclopedia }: DashboardCharact
       <Divider my="md" />
 
       <Flex align="center" direction="column" gap="sm">
-        <Text>Default Activity: {getFormattedActivity(character.defaultActivity ?? null)}</Text>
         {character.error && <Text>Error: {character.error}</Text>}
+        <Text>Default Activity: {getFormattedActivity(character.defaultActivity ?? null)}</Text>
         <Text size="md">Current Activity: {getFormattedActivity(character.activity)}</Text>
         <Group gap="sm">
           <Button onClick={clearActivity} disabled={!isActive} color="red">
