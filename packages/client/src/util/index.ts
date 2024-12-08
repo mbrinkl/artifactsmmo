@@ -1,4 +1,12 @@
-import { ActivityName, Encyclopedia } from "@artifacts/shared";
+import { Activity, ActivityName, Encyclopedia } from "@artifacts/shared";
+
+export const getFormattedActivity = (activity: Activity | null): string => {
+  if (!activity) {
+    return "none";
+  }
+  const params = Object.values(activity.params).join(", ");
+  return `${activity.name} ${params}`;
+};
 
 export const getParamsOptions = (activityName: ActivityName, { resources, items, monsters }: Encyclopedia) => {
   switch (activityName) {

@@ -13,7 +13,7 @@ import { ServeStaticModule } from "@nestjs/serve-static";
 import { SocketClientService } from "./services/socketClient.service";
 
 const getDbFilePath = () => {
-  let dbPath = process.env.db_path;
+  let dbPath = process.env.db_path ?? "";
   if (dbPath && !dbPath.endsWith("/")) {
     dbPath += "/";
   }
