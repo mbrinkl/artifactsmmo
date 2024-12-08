@@ -22,6 +22,7 @@ interface DashboardCharacterProps {
 export const DashboardCharacter = ({ character, encyclopedia }: DashboardCharacterProps) => {
   const [selectedActivityName, setSelectedActivityName] = useState<ActivityName | null>(null);
   const [selectedActivityParams, setSelectedActivityParams] = useState<ActivityParams | null>(null);
+  const [showStats, setShowStats] = useState(false);
 
   const updateActivityMutation = useUpdateActivityMutation();
   const updateDefaultActivityMutation = useUpdateDefaultActivityMutation();
@@ -70,9 +71,12 @@ export const DashboardCharacter = ({ character, encyclopedia }: DashboardCharact
         <Text size="xl" fw="bold">
           {character.characterName}
         </Text>
+        <Button size="xs" variant="subtle" onClick={() => setShowStats((prev) => !prev)}>
+          Stats
+        </Button>
       </Flex>
 
-      <CharacterStats character={character} />
+      {showStats && <CharacterStats character={character} />}
 
       <Divider my="md" />
 

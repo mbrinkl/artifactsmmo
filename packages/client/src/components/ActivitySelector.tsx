@@ -1,6 +1,7 @@
 import { ActivityName, activityNames, ActivityParams, Encyclopedia, initialParamsMap } from "@artifacts/shared";
-import { Button, Select, Stack } from "@mantine/core";
+import { Button, ComboboxData, Select, Stack } from "@mantine/core";
 import { getParamsOptions } from "../util";
+import { useMemo } from "react";
 
 interface ActivitySelectorProps {
   encyclopedia: Encyclopedia;
@@ -22,6 +23,13 @@ export const ActivitySelector = (props: ActivitySelectorProps) => {
     props.setSelectedActivityParams(updatedParams as ActivityParams);
   };
 
+  const paramsOptions: ComboboxData = useMemo(() => {
+    if (!props.selectedActivityName) {
+      return [];
+    }
+    return getParamsOptions(props.selectedActivityName, props.encyclopedia);
+  }, [props.selectedActivityName, props.encyclopedia]);
+
   return (
     <Stack>
       <Select
@@ -39,8 +47,7 @@ export const ActivitySelector = (props: ActivitySelectorProps) => {
             label={key}
             searchable
             size="md"
-            // todo: usememo and get by param key in case of multi param
-            data={getParamsOptions(props.selectedActivityName!, props.encyclopedia)}
+            data={paramsOptions}
             value={value}
             onChange={(v) => onChangeContext(key, v)}
           />
