@@ -50,7 +50,6 @@ export class Queue {
     }
 
     try {
-      throw new Error("idiot lmao");
       this.concurrencyCheck();
       [this.queue, this.activityCtx] = initialQueueFactory(
         initialCharacterState,
